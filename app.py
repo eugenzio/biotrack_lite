@@ -530,199 +530,122 @@ def show_analysis_results(temp_dir: str):
         secs = int(seconds % 60)
         return f"{mins:02d}:{secs:02d}"
 
-    # Get current progress percentage
-    progress_pct = (st.session_state.current_time / total_duration * 100) if total_duration > 0 else 0
-
-    # Modern Media Player UI
-    st.markdown(f"""
+    # --- Modern Media Player UI ---
+    st.markdown("""
     <style>
-        .media-player {{
-            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(40,40,40,0.95) 100%);
-            border-radius: 16px;
-            padding: 16px 24px;
+        .media-player-container {
+            background: #161b22;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
             margin: 1rem 0;
-        }}
-        .player-controls {{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 24px;
-            margin-bottom: 16px;
-        }}
-        .player-btn {{
-            background: none;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            opacity: 0.9;
-            transition: all 0.2s;
-        }}
-        .player-btn:hover {{
-            opacity: 1;
-            transform: scale(1.1);
-        }}
-        .player-btn.play {{
-            font-size: 42px;
-        }}
-        .player-right-controls {{
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }}
-        .player-right-btn {{
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.7);
-            font-size: 20px;
-            cursor: pointer;
-        }}
-        .progress-container {{
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }}
-        .time-display {{
-            color: rgba(255,255,255,0.8);
-            font-size: 13px;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            min-width: 45px;
-        }}
-        .progress-bar-bg {{
-            flex: 1;
-            height: 4px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 2px;
-            position: relative;
-            cursor: pointer;
-        }}
-        .progress-bar-fill {{
-            height: 100%;
-            background: white;
-            border-radius: 2px;
-            width: {progress_pct}%;
-            position: relative;
-        }}
-        .progress-bar-fill::after {{
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 12px;
-            height: 12px;
-            background: white;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }}
-
-        /* Hide default slider track text */
-        .stSlider [data-baseweb="slider"] > div:first-child {{
-            display: none;
-        }}
-
-        /* Custom slider styling for video player */
-        .video-slider .stSlider > div > div {{
+            border: 1px solid #30363d;
+        }
+        .media-player-container .stButton > button {
             background: transparent !important;
-        }}
+            color: #e6edf3 !important;
+            border: none !important;
+            font-size: 1.5rem;
+            padding: 0;
+            width: 48px;
+            height: 48px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .media-player-container .stButton > button:hover {
+            color: #58a6ff !important;
+            transform: scale(1.1);
+        }
+        .media-player-container .stButton > button:active {
+            transform: scale(1.0);
+        }
+        /* Make play/pause button (3rd element in the controls row) larger */
+        .media-player-container [data-testid="stHorizontalBlock"] > div:nth-child(3) button {
+            font-size: 2.2rem !important;
+        }
 
-        .video-slider .stSlider [data-baseweb="slider"] {{
-            padding: 0 !important;
-        }}
+        /* Align all control columns vertically */
+        .media-player-container [data-testid="stHorizontalBlock"] {
+            align-items: center;
+        }
 
-        /* Compact control buttons */
-        .compact-controls .stButton > button {{
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-        }}
-
-        .compact-controls .stButton > button:hover {{
-            background: rgba(255,255,255,0.2);
-        }}
-
-        .compact-controls .stSelectbox > div > div {{
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-        }}
+        .media-player-container div[data-testid="stVerticalBlock"] {
+            gap: 0;
+        }
+        .media-player-container .stSelectbox > div > div {
+            background: transparent;
+            border: none;
+        }
+        .media-player-container .stSelectbox select {
+            color: #8b949e;
+        }
+        .time-display {
+            color: #8b949e;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Mono', monospace;
+            padding-top: 8px; /* Align with slider */
+        }
     </style>
-
-    <div class="media-player">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div class="player-controls">
-                <span class="player-btn" title="Rewind 5s">⏮</span>
-                <span class="player-btn play" title="Play/Pause">{'⏸' if st.session_state.is_playing else '▶'}</span>
-                <span class="player-btn" title="Forward 5s">⏭</span>
-            </div>
-            <div class="player-right-controls">
-                <span class="player-right-btn" title="Picture in Picture">⧉</span>
-                <span class="player-right-btn" title="Fullscreen">⛶</span>
-                <span class="player-right-btn" title="More">»</span>
-            </div>
-        </div>
-        <div class="progress-container">
-            <span class="time-display">{format_time(st.session_state.current_time)}</span>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill"></div>
-            </div>
-            <span class="time-display" style="text-align: right;">{format_time(total_duration)}</span>
-        </div>
-    </div>
     """, unsafe_allow_html=True)
 
-    # Functional controls (styled to match media player)
-    st.markdown('<div class="compact-controls">', unsafe_allow_html=True)
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
+    with st.container():
+        st.markdown('<div class="media-player-container">', unsafe_allow_html=True)
+        
+        # --- Progress Bar ---
+        slider_cols = st.columns([1, 10, 1])
+        with slider_cols[0]:
+            st.markdown(f'<div class="time-display" style="text-align: left;">{format_time(st.session_state.current_time)}</div>', unsafe_allow_html=True)
 
-    with col1:
-        if st.button("⏮ -5s", key="rewind_btn", use_container_width=True):
-            st.session_state.current_time = max(0, st.session_state.current_time - 5)
-            st.rerun()
+        with slider_cols[1]:
+            selected_time = st.slider(
+                "Time",
+                min_value=0.0,
+                max_value=total_duration,
+                value=st.session_state.current_time,
+                step=1.0 / fps,
+                format="",
+                key="time_slider",
+                label_visibility="collapsed"
+            )
+        
+        with slider_cols[2]:
+            st.markdown(f'<div class="time-display" style="text-align: right;">{format_time(total_duration)}</div>', unsafe_allow_html=True)
 
-    with col2:
-        if st.session_state.is_playing:
-            if st.button("⏸ Pause", use_container_width=True, key="pause_btn"):
-                st.session_state.is_playing = False
+        # --- Playback Controls ---
+        # Use columns for centering and layout
+        left_spacer, rewind_col, play_col, forward_col, speed_col, frame_col, right_spacer = st.columns([3, 1, 1, 1, 1, 2, 3])
+
+        with rewind_col:
+            if st.button("⏮", key="rewind_btn_icon", use_container_width=True, help="Rewind 5s"):
+                st.session_state.current_time = max(0, st.session_state.current_time - 5)
                 st.rerun()
-        else:
-            if st.button("▶ Play", use_container_width=True, key="play_btn"):
-                st.session_state.is_playing = True
+        
+        with play_col:
+            play_icon = '⏸' if st.session_state.is_playing else '▶'
+            if st.button(play_icon, key="play_pause_btn_icon", use_container_width=True, help="Play/Pause"):
+                st.session_state.is_playing = not st.session_state.is_playing
                 st.rerun()
 
-    with col3:
-        if st.button("⏭ +5s", key="forward_btn", use_container_width=True):
-            st.session_state.current_time = min(total_duration, st.session_state.current_time + 5)
-            st.rerun()
+        with forward_col:
+            if st.button("⏭", key="forward_btn_icon", use_container_width=True, help="Forward 5s"):
+                st.session_state.current_time = min(total_duration, st.session_state.current_time + 5)
+                st.rerun()
 
-    with col4:
-        playback_speed = st.selectbox(
-            "Speed",
-            options=[0.25, 0.5, 1.0, 2.0, 4.0],
-            index=2,
-            format_func=lambda x: f"{x}x",
-            key="playback_speed",
-            label_visibility="collapsed"
-        )
+        with speed_col:
+            playback_speed = st.selectbox(
+                "Speed",
+                options=[0.25, 0.5, 1.0, 2.0, 4.0],
+                index=2,
+                format_func=lambda x: f"{x}x",
+                key="playback_speed",
+                label_visibility="collapsed"
+            )
 
-    with col5:
-        st.markdown(f'<p style="color: #8b949e; font-size: 0.85rem; margin: 0; padding-top: 8px;">Frame {int(st.session_state.current_time * fps):,}</p>', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # Time slider (hidden visual, functional only)
-    st.markdown('<div class="video-slider">', unsafe_allow_html=True)
-    selected_time = st.slider(
-        "Time",
-        min_value=0.0,
-        max_value=total_duration,
-        value=st.session_state.current_time,
-        step=1.0 / fps,
-        format="",
-        key="time_slider",
-        label_visibility="collapsed"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+        with frame_col:
+            st.markdown(f'<div class="time-display" style="text-align: right; padding-top: 14px;">Frame {int(st.session_state.current_time * fps):,}</div>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # Update current_time if slider moved manually
     if not st.session_state.is_playing:
