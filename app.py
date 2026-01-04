@@ -20,7 +20,7 @@ from io import BytesIO
 import zipfile
 
 # Import local modules
-from tracker import RodentTracker
+from tracker import RodentTracker, BodyParts
 from metrics import (
     calculate_velocity,
     calculate_total_distance,
@@ -40,288 +40,281 @@ from visualization import (
 )
 
 
-# Professional Gray Theme CSS
+# Professional Research Theme CSS
 PROFESSIONAL_THEME = """
 <style>
-    /* Import professional font */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    /* Import professional fonts */
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+    /* CSS Variables for consistent theming */
+    :root {
+        --bg-primary: #0d1117;
+        --bg-secondary: #161b22;
+        --bg-tertiary: #21262d;
+        --bg-hover: #30363d;
+        --border-primary: #30363d;
+        --border-secondary: #21262d;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --text-muted: #6e7681;
+        --accent-primary: #58a6ff;
+        --accent-secondary: #388bfd;
+        --accent-success: #3fb950;
+        --accent-warning: #d29922;
+        --accent-danger: #f85149;
+    }
 
     /* Main app background */
     .stApp {
-        background-color: #1e1e1e;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg-primary);
+        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* Sidebar styling */
+    /* Hide sidebar completely */
     [data-testid="stSidebar"] {
-        background-color: #252526;
-        border-right: 1px solid #3c3c3c;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-        color: #cccccc;
-    }
-
-    [data-testid="stSidebar"] .stSlider label,
-    [data-testid="stSidebar"] .stNumberInput label,
-    [data-testid="stSidebar"] .stCheckbox label {
-        color: #cccccc !important;
+        display: none;
     }
 
     /* Headers */
     h1 {
-        color: #ffffff !important;
+        color: var(--text-primary) !important;
         font-weight: 600 !important;
-        font-size: 1.75rem !important;
-        letter-spacing: -0.02em;
-        border-bottom: 2px solid #3c3c3c;
-        padding-bottom: 0.75rem;
-        margin-bottom: 1.5rem;
+        font-size: 2rem !important;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.5rem;
     }
 
     h2, h3 {
-        color: #e0e0e0 !important;
-        font-weight: 500 !important;
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.02em;
     }
 
-    /* Sidebar headers */
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3 {
-        color: #ffffff !important;
-        font-size: 0.9rem !important;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        border-bottom: 1px solid #3c3c3c;
-        padding-bottom: 0.5rem;
-        margin-top: 1.5rem;
-    }
-
-    /* Text color */
+    /* Text */
     .stMarkdown, p, span, label {
-        color: #d4d4d4;
+        color: var(--text-secondary);
     }
 
-    /* Metric cards */
+    /* Metric cards - refined */
     [data-testid="stMetric"] {
-        background: linear-gradient(135deg, #2d2d2d 0%, #252526 100%);
-        border: 1px solid #3c3c3c;
-        border-radius: 8px;
-        padding: 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: 12px;
+        padding: 1.25rem;
     }
 
     [data-testid="stMetric"] label {
-        color: #808080 !important;
-        font-size: 0.75rem !important;
+        color: var(--text-muted) !important;
+        font-size: 0.7rem !important;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
+        font-weight: 500;
     }
 
     [data-testid="stMetric"] [data-testid="stMetricValue"] {
-        color: #ffffff !important;
-        font-size: 1.5rem !important;
+        color: var(--text-primary) !important;
+        font-size: 1.75rem !important;
         font-weight: 600 !important;
+        font-family: 'IBM Plex Mono', monospace;
     }
 
-    /* Buttons */
+    /* Primary button - clean blue */
     .stButton > button {
-        background: linear-gradient(135deg, #0e639c 0%, #1177bb 100%);
-        color: white !important;
+        background: var(--accent-primary);
+        color: var(--bg-primary) !important;
         border: none;
-        border-radius: 4px;
-        font-weight: 500;
-        padding: 0.5rem 1rem;
-        transition: all 0.2s ease;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.15s ease;
+        font-size: 0.9rem;
     }
 
     .stButton > button:hover {
-        background: linear-gradient(135deg, #1177bb 0%, #1e90ff 100%);
-        box-shadow: 0 2px 8px rgba(14, 99, 156, 0.4);
+        background: var(--accent-secondary);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
     }
 
-    /* Primary button */
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #0e639c 0%, #1177bb 100%);
+    .stButton > button:active {
+        transform: translateY(0);
     }
 
-    /* Download buttons */
+    /* Download buttons - subtle */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, #2d2d2d 0%, #3c3c3c 100%);
-        border: 1px solid #4a4a4a;
-        color: #ffffff !important;
-    }
-
-    .stDownloadButton > button:hover {
-        background: linear-gradient(135deg, #3c3c3c 0%, #4a4a4a 100%);
-        border-color: #5a5a5a;
-    }
-
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        background-color: #252526;
-        border-radius: 8px 8px 0 0;
-        padding: 0.25rem;
-        gap: 0;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        background-color: transparent;
-        color: #808080;
-        border-radius: 6px;
-        padding: 0.5rem 1rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-primary);
+        color: var(--text-primary) !important;
+        border-radius: 8px;
         font-weight: 500;
     }
 
+    .stDownloadButton > button:hover {
+        background: var(--bg-hover);
+        border-color: var(--accent-primary);
+    }
+
+    /* Tabs - minimal */
+    .stTabs [data-baseweb="tab-list"] {
+        background: transparent;
+        border-bottom: 1px solid var(--border-primary);
+        gap: 0;
+        padding: 0;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 0;
+        padding: 0.75rem 1.25rem;
+        font-weight: 500;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+    }
+
     .stTabs [data-baseweb="tab"]:hover {
-        background-color: #3c3c3c;
-        color: #ffffff;
+        color: var(--text-primary);
+        background: transparent;
     }
 
     .stTabs [aria-selected="true"] {
-        background-color: #0e639c !important;
-        color: #ffffff !important;
+        background: transparent !important;
+        color: var(--accent-primary) !important;
+        border-bottom: 2px solid var(--accent-primary) !important;
     }
 
     .stTabs [data-baseweb="tab-panel"] {
-        background-color: #252526;
-        border-radius: 0 0 8px 8px;
-        padding: 1rem;
-        border: 1px solid #3c3c3c;
+        background: var(--bg-secondary);
+        border-radius: 0 0 12px 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-primary);
         border-top: none;
     }
 
-    /* File uploader */
+    /* File uploader - clean */
     [data-testid="stFileUploader"] {
-        background-color: #2d2d2d;
-        border: 2px dashed #4a4a4a;
-        border-radius: 8px;
-        padding: 1rem;
+        background: var(--bg-secondary);
+        border: 2px dashed var(--border-primary);
+        border-radius: 12px;
+        padding: 2rem;
     }
 
     [data-testid="stFileUploader"]:hover {
-        border-color: #0e639c;
+        border-color: var(--accent-primary);
+        background: var(--bg-tertiary);
     }
 
-    /* Sliders */
-    .stSlider [data-baseweb="slider"] {
-        background-color: #3c3c3c;
+    /* Sliders - refined */
+    .stSlider > div > div > div {
+        background: var(--border-primary) !important;
     }
 
-    .stSlider [data-testid="stThumbValue"] {
-        color: #ffffff;
+    .stSlider [data-baseweb="slider"] [role="slider"] {
+        background: var(--accent-primary) !important;
     }
 
     /* Progress bar */
     .stProgress > div > div {
-        background-color: #0e639c;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        border-radius: 4px;
     }
 
-    /* Info/Success/Error boxes */
-    .stAlert {
-        background-color: #2d2d2d;
-        border: 1px solid #3c3c3c;
-        border-radius: 6px;
-    }
-
-    [data-testid="stAlert"] {
-        background-color: #2d2d2d;
-        border-left: 4px solid #0e639c;
-    }
-
-    /* Success message */
-    .stSuccess {
-        background-color: #1e3a29 !important;
-        border-left-color: #28a745 !important;
-    }
-
-    /* DataFrame styling */
+    /* DataFrame - clean table */
     [data-testid="stDataFrame"] {
-        background-color: #252526;
-        border-radius: 8px;
-    }
-
-    .dataframe {
-        background-color: #252526 !important;
-        color: #d4d4d4 !important;
-    }
-
-    .dataframe th {
-        background-color: #2d2d2d !important;
-        color: #ffffff !important;
-        font-weight: 600;
-    }
-
-    .dataframe td {
-        background-color: #252526 !important;
-        color: #d4d4d4 !important;
-        border-color: #3c3c3c !important;
-    }
-
-    /* Caption text */
-    .stCaption {
-        color: #808080 !important;
-        font-size: 0.75rem;
-    }
-
-    /* Divider */
-    hr {
-        border-color: #3c3c3c;
-    }
-
-    /* Image containers */
-    [data-testid="stImage"] {
-        border-radius: 8px;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        border: 1px solid var(--border-primary);
         overflow: hidden;
-        border: 1px solid #3c3c3c;
     }
 
-    /* Expander */
-    .streamlit-expanderHeader {
-        background-color: #2d2d2d;
-        border-radius: 6px;
-        color: #ffffff !important;
+    /* Expander - minimal */
+    [data-testid="stExpander"] {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    [data-testid="stExpander"] summary {
+        padding: 1rem 1.25rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    [data-testid="stExpander"] summary:hover {
+        background: var(--bg-tertiary);
     }
 
     /* Number input */
     .stNumberInput input {
-        background-color: #2d2d2d;
-        border: 1px solid #3c3c3c;
-        color: #ffffff;
-        border-radius: 4px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-primary);
+        color: var(--text-primary);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .stNumberInput input:focus {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+    }
+
+    /* Selectbox */
+    .stSelectbox > div > div {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-primary);
+        border-radius: 8px;
     }
 
     /* Checkbox */
     .stCheckbox label span {
-        color: #d4d4d4 !important;
+        color: var(--text-secondary) !important;
     }
 
-    /* Column containers */
-    [data-testid="column"] {
-        padding: 0.25rem;
+    /* Image containers */
+    [data-testid="stImage"] {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border-primary);
+    }
+
+    /* Caption */
+    .stCaption {
+        color: var(--text-muted) !important;
+        font-size: 0.8rem;
+    }
+
+    /* Alerts */
+    [data-testid="stAlert"] {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: 8px;
+        border-left: 3px solid var(--accent-primary);
     }
 
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
+    header {visibility: hidden;}
 
     /* Custom scrollbar */
     ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
     }
 
     ::-webkit-scrollbar-track {
-        background: #1e1e1e;
+        background: var(--bg-primary);
     }
 
     ::-webkit-scrollbar-thumb {
-        background: #3c3c3c;
-        border-radius: 4px;
+        background: var(--border-primary);
+        border-radius: 5px;
+        border: 2px solid var(--bg-primary);
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: #4a4a4a;
+        background: var(--text-muted);
     }
 </style>
 """
@@ -359,7 +352,7 @@ def main():
     st.markdown("""
     <div style="text-align: center; margin-bottom: 2rem;">
         <h1 style="margin-bottom: 0.5rem;">BioTrack-Lite</h1>
-        <p style="color: #808080;">
+        <p style="color: #8b949e; font-size: 0.95rem;">
             Offline Behavioral Analysis System | MOG2 Background Subtraction
         </p>
     </div>
@@ -411,11 +404,11 @@ def main():
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown(f"""
-        <div style="background: #2d2d2d; padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: center;">
-            <div style="color: #28a745; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">
+        <div style="background: #161b22; padding: 1rem; border-radius: 12px; margin: 1rem 0; text-align: center; border: 1px solid #30363d;">
+            <div style="color: #3fb950; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">
                 Video Loaded
             </div>
-            <div style="color: #808080;">
+            <div style="color: #8b949e; font-family: 'IBM Plex Mono', monospace;">
                 {total_frames:,} frames | {duration_s:.1f}s | {frame_width}x{frame_height}
             </div>
         </div>
@@ -459,6 +452,13 @@ def main():
             center_zone_pct = st.slider("Center Zone (%)", 40, 80, 60) / 100.0
             preview_interval = st.slider("Preview Interval", 1, 30, 10)
 
+            st.markdown("---")
+            detect_body_parts = st.checkbox(
+                "Detect Body Parts (Head/Body/Tail)",
+                value=True,
+                help="Estimate head, body center, and tail positions using contour geometry"
+            )
+
     roi_pct = {'top': roi_top, 'bottom': roi_bottom, 'left': roi_left, 'right': roi_right}
     crop_width = int(frame_width * (100 - roi_left - roi_right) / 100)
     crop_height = int(frame_height * (100 - roi_top - roi_bottom) / 100)
@@ -490,7 +490,8 @@ def main():
                 freezing_velocity=freezing_velocity,
                 freezing_duration=freezing_duration,
                 center_zone_pct=center_zone_pct,
-                preview_interval=preview_interval
+                preview_interval=preview_interval,
+                detect_body_parts=detect_body_parts
             )
 
     # Show preview
@@ -518,9 +519,7 @@ def show_analysis_results(temp_dir: str):
     freezing_duration = params['freezing_duration']
     center_zone_pct = params['center_zone_pct']
     total_frames = params['total_frames']
-
-    # Frame Review Section
-    st.markdown("### Video Review")
+    detect_body_parts = params.get('detect_body_parts', False)
 
     # Calculate total duration
     total_duration = total_frames / fps
@@ -528,14 +527,160 @@ def show_analysis_results(temp_dir: str):
     # Helper function to format time as MM:SS
     def format_time(seconds):
         mins = int(seconds // 60)
-        secs = seconds % 60
-        return f"{mins:02d}:{secs:05.2f}"
+        secs = int(seconds % 60)
+        return f"{mins:02d}:{secs:02d}"
 
-    # Playback controls
-    col_play, col_speed, col_time = st.columns([1, 1, 2])
+    # Get current progress percentage
+    progress_pct = (st.session_state.current_time / total_duration * 100) if total_duration > 0 else 0
 
-    with col_play:
-        # Play/Pause button
+    # Modern Media Player UI
+    st.markdown(f"""
+    <style>
+        .media-player {{
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(40,40,40,0.95) 100%);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin: 1rem 0;
+        }}
+        .player-controls {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }}
+        .player-btn {{
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            opacity: 0.9;
+            transition: all 0.2s;
+        }}
+        .player-btn:hover {{
+            opacity: 1;
+            transform: scale(1.1);
+        }}
+        .player-btn.play {{
+            font-size: 42px;
+        }}
+        .player-right-controls {{
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }}
+        .player-right-btn {{
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            font-size: 20px;
+            cursor: pointer;
+        }}
+        .progress-container {{
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }}
+        .time-display {{
+            color: rgba(255,255,255,0.8);
+            font-size: 13px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            min-width: 45px;
+        }}
+        .progress-bar-bg {{
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }}
+        .progress-bar-fill {{
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            width: {progress_pct}%;
+            position: relative;
+        }}
+        .progress-bar-fill::after {{
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }}
+
+        /* Hide default slider track text */
+        .stSlider [data-baseweb="slider"] > div:first-child {{
+            display: none;
+        }}
+
+        /* Custom slider styling for video player */
+        .video-slider .stSlider > div > div {{
+            background: transparent !important;
+        }}
+
+        .video-slider .stSlider [data-baseweb="slider"] {{
+            padding: 0 !important;
+        }}
+
+        /* Compact control buttons */
+        .compact-controls .stButton > button {{
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }}
+
+        .compact-controls .stButton > button:hover {{
+            background: rgba(255,255,255,0.2);
+        }}
+
+        .compact-controls .stSelectbox > div > div {{
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }}
+    </style>
+
+    <div class="media-player">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="player-controls">
+                <span class="player-btn" title="Rewind 5s">⏮</span>
+                <span class="player-btn play" title="Play/Pause">{'⏸' if st.session_state.is_playing else '▶'}</span>
+                <span class="player-btn" title="Forward 5s">⏭</span>
+            </div>
+            <div class="player-right-controls">
+                <span class="player-right-btn" title="Picture in Picture">⧉</span>
+                <span class="player-right-btn" title="Fullscreen">⛶</span>
+                <span class="player-right-btn" title="More">»</span>
+            </div>
+        </div>
+        <div class="progress-container">
+            <span class="time-display">{format_time(st.session_state.current_time)}</span>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill"></div>
+            </div>
+            <span class="time-display" style="text-align: right;">{format_time(total_duration)}</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Functional controls (styled to match media player)
+    st.markdown('<div class="compact-controls">', unsafe_allow_html=True)
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
+
+    with col1:
+        if st.button("⏮ -5s", key="rewind_btn", use_container_width=True):
+            st.session_state.current_time = max(0, st.session_state.current_time - 5)
+            st.rerun()
+
+    with col2:
         if st.session_state.is_playing:
             if st.button("⏸ Pause", use_container_width=True, key="pause_btn"):
                 st.session_state.is_playing = False
@@ -545,35 +690,39 @@ def show_analysis_results(temp_dir: str):
                 st.session_state.is_playing = True
                 st.rerun()
 
-    with col_speed:
+    with col3:
+        if st.button("⏭ +5s", key="forward_btn", use_container_width=True):
+            st.session_state.current_time = min(total_duration, st.session_state.current_time + 5)
+            st.rerun()
+
+    with col4:
         playback_speed = st.selectbox(
             "Speed",
             options=[0.25, 0.5, 1.0, 2.0, 4.0],
             index=2,
             format_func=lambda x: f"{x}x",
-            key="playback_speed"
+            key="playback_speed",
+            label_visibility="collapsed"
         )
 
-    with col_time:
-        st.markdown(f"""
-        <div style="padding: 0.5rem; background: #2d2d2d; border-radius: 6px; text-align: center;">
-            <span style="color: #ffffff; font-size: 1.2rem; font-family: monospace;">
-                {format_time(st.session_state.current_time)} / {format_time(total_duration)}
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
+    with col5:
+        st.markdown(f'<p style="color: #8b949e; font-size: 0.85rem; margin: 0; padding-top: 8px;">Frame {int(st.session_state.current_time * fps):,}</p>', unsafe_allow_html=True)
 
-    # Time slider (in seconds)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Time slider (hidden visual, functional only)
+    st.markdown('<div class="video-slider">', unsafe_allow_html=True)
     selected_time = st.slider(
         "Time",
         min_value=0.0,
         max_value=total_duration,
         value=st.session_state.current_time,
         step=1.0 / fps,
-        format="%.2f s",
+        format="",
         key="time_slider",
         label_visibility="collapsed"
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Update current_time if slider moved manually
     if not st.session_state.is_playing:
@@ -582,9 +731,6 @@ def show_analysis_results(temp_dir: str):
     # Convert time to frame
     selected_frame = int(selected_time * fps)
     selected_frame = min(selected_frame, total_frames - 1)
-
-    # Display frame info
-    st.caption(f"Frame {selected_frame:,} / {total_frames - 1:,}")
 
     # Re-open video to get selected frame
     if os.path.exists(video_path):
@@ -606,7 +752,7 @@ def show_analysis_results(temp_dir: str):
             ret, frame = review_cap.read()
             if not ret:
                 break
-            _, review_mask = review_tracker.process_frame(frame, roi_pct)
+            _, review_mask, _ = review_tracker.process_frame(frame, roi_pct, detect_body_parts=False)
             if i == selected_frame:
                 review_frame = frame
 
@@ -619,7 +765,24 @@ def show_analysis_results(temp_dir: str):
             with col1:
                 st.caption("Video Feed")
                 stored_centroid = (tracking_data[selected_frame]['x'], tracking_data[selected_frame]['y'])
-                annotated_review = review_tracker.annotate_frame(review_frame, stored_centroid, roi_pct)
+
+                # Reconstruct body parts from stored data if available
+                stored_body_parts = None
+                if detect_body_parts and 'head_x' in tracking_data[selected_frame]:
+                    frame_data = tracking_data[selected_frame]
+                    if not np.isnan(frame_data.get('head_x', np.nan)):
+                        stored_body_parts = BodyParts(
+                            head=(frame_data['head_x'], frame_data['head_y']),
+                            body=(frame_data['body_x'], frame_data['body_y']),
+                            tail=(frame_data['tail_x'], frame_data['tail_y']),
+                            orientation=frame_data['orientation'],
+                            body_length=frame_data['body_length'],
+                            confidence=frame_data['confidence']
+                        )
+
+                annotated_review = review_tracker.annotate_frame(
+                    review_frame, stored_centroid, roi_pct, body_parts=stored_body_parts
+                )
                 annotated_review_rgb = cv2.cvtColor(annotated_review, cv2.COLOR_BGR2RGB)
                 st.image(annotated_review_rgb, use_container_width=True)
 
@@ -702,10 +865,10 @@ def show_welcome_screen():
 
     with col1:
         st.markdown("""
-        <div style="background: #252526; padding: 1.5rem; border-radius: 8px;
-                    border: 1px solid #3c3c3c; height: 160px;">
-            <h4 style="color: #ffffff; margin-bottom: 0.75rem;">MOG2 Tracking</h4>
-            <p style="color: #808080; font-size: 0.9rem;">
+        <div style="background: #161b22; padding: 1.5rem; border-radius: 12px;
+                    border: 1px solid #30363d; height: 160px;">
+            <h4 style="color: #e6edf3; margin-bottom: 0.75rem; font-weight: 600;">MOG2 Tracking</h4>
+            <p style="color: #8b949e; font-size: 0.9rem; line-height: 1.5;">
                 Classical background subtraction algorithm.
                 CPU-friendly, no GPU required.
             </p>
@@ -714,10 +877,10 @@ def show_welcome_screen():
 
     with col2:
         st.markdown("""
-        <div style="background: #252526; padding: 1.5rem; border-radius: 8px;
-                    border: 1px solid #3c3c3c; height: 160px;">
-            <h4 style="color: #ffffff; margin-bottom: 0.75rem;">Behavioral Metrics</h4>
-            <p style="color: #808080; font-size: 0.9rem;">
+        <div style="background: #161b22; padding: 1.5rem; border-radius: 12px;
+                    border: 1px solid #30363d; height: 160px;">
+            <h4 style="color: #e6edf3; margin-bottom: 0.75rem; font-weight: 600;">Behavioral Metrics</h4>
+            <p style="color: #8b949e; font-size: 0.9rem; line-height: 1.5;">
                 Distance, velocity, thigmotaxis, freezing detection,
                 zone crossings.
             </p>
@@ -726,10 +889,10 @@ def show_welcome_screen():
 
     with col3:
         st.markdown("""
-        <div style="background: #252526; padding: 1.5rem; border-radius: 8px;
-                    border: 1px solid #3c3c3c; height: 160px;">
-            <h4 style="color: #ffffff; margin-bottom: 0.75rem;">Data Export</h4>
-            <p style="color: #808080; font-size: 0.9rem;">
+        <div style="background: #161b22; padding: 1.5rem; border-radius: 12px;
+                    border: 1px solid #30363d; height: 160px;">
+            <h4 style="color: #e6edf3; margin-bottom: 0.75rem; font-weight: 600;">Data Export</h4>
+            <p style="color: #8b949e; font-size: 0.9rem; line-height: 1.5;">
                 Export tracking data and statistics
                 to CSV or Excel.
             </p>
@@ -778,7 +941,8 @@ def run_analysis(
     freezing_velocity: float,
     freezing_duration: float,
     center_zone_pct: float,
-    preview_interval: int
+    preview_interval: int,
+    detect_body_parts: bool = True
 ):
     """Run the full tracking and analysis pipeline."""
 
@@ -821,20 +985,39 @@ def run_analysis(
         if not ret:
             break
 
-        # Process frame
-        centroid, mask = tracker.process_frame(frame, roi_pct)
+        # Process frame with optional body part detection
+        centroid, mask, body_parts = tracker.process_frame(
+            frame, roi_pct, detect_body_parts=detect_body_parts
+        )
 
         # Store data
-        tracking_data.append({
+        frame_data = {
             'frame': frame_idx,
             'x': centroid[0],
             'y': centroid[1]
-        })
+        }
+
+        # Add body part data if available
+        if body_parts is not None:
+            frame_data.update(body_parts.to_dict())
+        else:
+            # Add NaN values for body parts when not detected
+            frame_data.update({
+                'head_x': np.nan, 'head_y': np.nan,
+                'body_x': np.nan, 'body_y': np.nan,
+                'tail_x': np.nan, 'tail_y': np.nan,
+                'orientation': np.nan, 'body_length': np.nan,
+                'confidence': np.nan
+            })
+
+        tracking_data.append(frame_data)
 
         # Update preview periodically
         if frame_idx % preview_interval == 0:
-            # Annotate frame
-            annotated = tracker.annotate_frame(frame, centroid, roi_pct)
+            # Annotate frame with body parts
+            annotated = tracker.annotate_frame(
+                frame, centroid, roi_pct, body_parts=body_parts
+            )
             annotated_rgb = cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB)
 
             # Resize for display
@@ -876,7 +1059,8 @@ def run_analysis(
         'freezing_velocity': freezing_velocity,
         'freezing_duration': freezing_duration,
         'center_zone_pct': center_zone_pct,
-        'total_frames': total_frames
+        'total_frames': total_frames,
+        'detect_body_parts': detect_body_parts
     }
 
     # Rerun to show frame review with session state

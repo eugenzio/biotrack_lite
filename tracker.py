@@ -10,11 +10,43 @@ Key Design Decisions:
 - Shadow handling is critical because MOG2 marks shadows as gray (127),
   which would otherwise be detected as part of the animal.
 - Morphological operations clean up sensor noise without losing the subject.
+
+Body Part Detection:
+- Head, body, and tail are estimated using contour geometry analysis
+- Ellipse fitting determines the animal's orientation (major axis)
+- Movement direction disambiguates head from tail (head leads movement)
+- This is a geometric approximation, not true pose estimation
 """
 
 import cv2
 import numpy as np
 from typing import Tuple, Optional, Dict
+from dataclasses import dataclass
+
+
+@dataclass
+class BodyParts:
+    """Data class for storing detected body part positions."""
+    head: Tuple[float, float]      # (x, y) of estimated head position
+    body: Tuple[float, float]      # (x, y) of body center (centroid)
+    tail: Tuple[float, float]      # (x, y) of estimated tail position
+    orientation: float             # Angle in degrees (0-360)
+    body_length: float             # Distance from head to tail in pixels
+    confidence: float              # Detection confidence (0-1)
+
+    def to_dict(self) -> Dict:
+        """Convert to dictionary for DataFrame storage."""
+        return {
+            'head_x': self.head[0],
+            'head_y': self.head[1],
+            'body_x': self.body[0],
+            'body_y': self.body[1],
+            'tail_x': self.tail[0],
+            'tail_y': self.tail[1],
+            'orientation': self.orientation,
+            'body_length': self.body_length,
+            'confidence': self.confidence
+        }
 
 
 class RodentTracker:
@@ -82,9 +114,15 @@ class RodentTracker:
         # Ellipse shape preserves curved edges better than rectangle
         self.morph_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
+        # Body part tracking state
+        self.prev_centroid: Tuple[float, float] = (np.nan, np.nan)
+        self.prev_head: Tuple[float, float] = (np.nan, np.nan)
+        self.movement_history: list = []  # Store recent movement vectors
+        self.history_size: int = 5  # Frames to average for direction
+
     def reset_background(self) -> None:
         """
-        Reset the background model.
+        Reset the background model and body part tracking state.
 
         Call this when processing a new video to clear the learned background
         from the previous video.
@@ -94,6 +132,10 @@ class RodentTracker:
             varThreshold=self.var_threshold,
             detectShadows=True
         )
+        # Reset body part tracking state
+        self.prev_centroid = (np.nan, np.nan)
+        self.prev_head = (np.nan, np.nan)
+        self.movement_history = []
 
     def crop_roi(
         self,
@@ -278,11 +320,185 @@ class RodentTracker:
 
         return (cx, cy)
 
+    def find_body_parts(
+        self,
+        mask: np.ndarray,
+        centroid: Tuple[float, float]
+    ) -> Optional[BodyParts]:
+        """
+        Estimate head, body, and tail positions from contour geometry.
+
+        Uses ellipse fitting and movement direction to estimate body parts.
+        The head is determined by the direction of movement (animals move head-first).
+
+        Args:
+            mask: Cleaned binary mask.
+            centroid: Pre-calculated centroid from find_centroid().
+
+        Returns:
+            BodyParts object with estimated positions, or None if detection fails.
+
+        Algorithm:
+            1. Find the largest contour (same as centroid detection)
+            2. Fit an ellipse to get orientation and major/minor axes
+            3. Find the two extreme points along the major axis
+            4. Use movement history to determine which end is the head
+            5. If stationary, use proximity to previous head position
+        """
+        if np.isnan(centroid[0]):
+            return None
+
+        # Find contours
+        contours, _ = cv2.findContours(
+            mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+
+        if not contours:
+            return None
+
+        # Filter and get largest contour
+        valid_contours = [
+            c for c in contours
+            if cv2.contourArea(c) >= self.min_contour_area
+        ]
+
+        if not valid_contours:
+            return None
+
+        largest_contour = max(valid_contours, key=cv2.contourArea)
+
+        # Need at least 5 points for ellipse fitting
+        if len(largest_contour) < 5:
+            return None
+
+        # Fit ellipse to contour
+        try:
+            ellipse = cv2.fitEllipse(largest_contour)
+            (cx, cy), (minor_axis, major_axis), angle = ellipse
+        except cv2.error:
+            return None
+
+        # Calculate endpoints along the major axis
+        # Angle is in degrees, convert to radians
+        angle_rad = np.radians(angle)
+
+        # The semi-major axis length
+        semi_major = major_axis / 2
+
+        # Calculate the two endpoints along the major axis
+        # Note: OpenCV ellipse angle is from the horizontal axis
+        dx = semi_major * np.cos(angle_rad - np.pi/2)
+        dy = semi_major * np.sin(angle_rad - np.pi/2)
+
+        endpoint1 = (centroid[0] + dx, centroid[1] + dy)
+        endpoint2 = (centroid[0] - dx, centroid[1] - dy)
+
+        # Determine which endpoint is the head using movement direction
+        head, tail = self._determine_head_tail(endpoint1, endpoint2, centroid)
+
+        # Calculate body length
+        body_length = np.sqrt(
+            (head[0] - tail[0])**2 + (head[1] - tail[1])**2
+        )
+
+        # Calculate orientation (angle from tail to head)
+        orientation = np.degrees(np.arctan2(
+            head[1] - tail[1],
+            head[0] - tail[0]
+        ))
+        if orientation < 0:
+            orientation += 360
+
+        # Confidence based on ellipse elongation (more elongated = more confident)
+        elongation = major_axis / minor_axis if minor_axis > 0 else 1
+        confidence = min(1.0, (elongation - 1) / 3)  # Max confidence at 4:1 ratio
+
+        # Update tracking state
+        self.prev_head = head
+
+        return BodyParts(
+            head=head,
+            body=centroid,
+            tail=tail,
+            orientation=orientation,
+            body_length=body_length,
+            confidence=confidence
+        )
+
+    def _determine_head_tail(
+        self,
+        endpoint1: Tuple[float, float],
+        endpoint2: Tuple[float, float],
+        centroid: Tuple[float, float]
+    ) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+        """
+        Determine which endpoint is the head and which is the tail.
+
+        Uses movement direction as the primary indicator (head leads movement).
+        Falls back to previous head position if stationary.
+
+        Args:
+            endpoint1: First endpoint along major axis.
+            endpoint2: Second endpoint along major axis.
+            centroid: Current body center.
+
+        Returns:
+            Tuple of (head, tail) positions.
+        """
+        # Update movement history
+        if not np.isnan(self.prev_centroid[0]):
+            dx = centroid[0] - self.prev_centroid[0]
+            dy = centroid[1] - self.prev_centroid[1]
+            movement = np.sqrt(dx**2 + dy**2)
+
+            if movement > 2:  # Minimum movement threshold (pixels)
+                self.movement_history.append((dx, dy))
+                if len(self.movement_history) > self.history_size:
+                    self.movement_history.pop(0)
+
+        self.prev_centroid = centroid
+
+        # Calculate average movement direction
+        if len(self.movement_history) >= 2:
+            avg_dx = np.mean([m[0] for m in self.movement_history])
+            avg_dy = np.mean([m[1] for m in self.movement_history])
+
+            # Dot product to determine which endpoint is in movement direction
+            dot1 = (endpoint1[0] - centroid[0]) * avg_dx + \
+                   (endpoint1[1] - centroid[1]) * avg_dy
+            dot2 = (endpoint2[0] - centroid[0]) * avg_dx + \
+                   (endpoint2[1] - centroid[1]) * avg_dy
+
+            if dot1 > dot2:
+                return endpoint1, endpoint2
+            else:
+                return endpoint2, endpoint1
+
+        # Fallback: use proximity to previous head position
+        if not np.isnan(self.prev_head[0]):
+            dist1 = np.sqrt(
+                (endpoint1[0] - self.prev_head[0])**2 +
+                (endpoint1[1] - self.prev_head[1])**2
+            )
+            dist2 = np.sqrt(
+                (endpoint2[0] - self.prev_head[0])**2 +
+                (endpoint2[1] - self.prev_head[1])**2
+            )
+
+            if dist1 < dist2:
+                return endpoint1, endpoint2
+            else:
+                return endpoint2, endpoint1
+
+        # Default: arbitrary assignment (first frame, stationary)
+        return endpoint1, endpoint2
+
     def process_frame(
         self,
         frame: np.ndarray,
-        roi_pct: Optional[Dict[str, float]] = None
-    ) -> Tuple[Tuple[float, float], np.ndarray]:
+        roi_pct: Optional[Dict[str, float]] = None,
+        detect_body_parts: bool = False
+    ) -> Tuple[Tuple[float, float], np.ndarray, Optional[BodyParts]]:
         """
         Process a single video frame through the complete tracking pipeline.
 
@@ -296,21 +512,24 @@ class RodentTracker:
             5. Morphological cleanup
             6. Contour detection
             7. Centroid calculation
+            8. Body part estimation (optional)
 
         Args:
             frame: Input BGR image from video.
             roi_pct: Optional ROI crop percentages. If None, uses full frame.
+            detect_body_parts: If True, also estimate head/body/tail positions.
 
         Returns:
             Tuple of:
                 - (x, y): Centroid coordinates (or (np.nan, np.nan) if not found)
                 - mask: Processed binary mask for visualization
+                - body_parts: BodyParts object if detect_body_parts=True, else None
 
         Example:
             >>> cap = cv2.VideoCapture('mouse_video.mp4')
             >>> tracker = RodentTracker()
             >>> ret, frame = cap.read()
-            >>> centroid, mask = tracker.process_frame(frame)
+            >>> centroid, mask, body_parts = tracker.process_frame(frame, detect_body_parts=True)
         """
         # Step 1: Crop to ROI if specified
         if roi_pct is not None:
@@ -328,34 +547,86 @@ class RodentTracker:
         # Step 6 & 7: Find centroid
         centroid = self.find_centroid(mask)
 
-        return centroid, mask
+        # Step 8: Body part estimation (optional)
+        body_parts = None
+        if detect_body_parts:
+            body_parts = self.find_body_parts(mask, centroid)
+
+        return centroid, mask, body_parts
 
     def annotate_frame(
         self,
         frame: np.ndarray,
         centroid: Tuple[float, float],
-        roi_pct: Optional[Dict[str, float]] = None
+        roi_pct: Optional[Dict[str, float]] = None,
+        body_parts: Optional[BodyParts] = None
     ) -> np.ndarray:
         """
-        Draw the detected centroid on the frame for visualization.
+        Draw the detected centroid and body parts on the frame for visualization.
 
         Args:
             frame: Original BGR frame.
             centroid: (x, y) coordinates from process_frame().
             roi_pct: ROI percentages (needed to offset coordinates correctly).
+            body_parts: Optional BodyParts object for head/body/tail visualization.
 
         Returns:
-            Annotated frame with centroid marker.
+            Annotated frame with tracking markers.
+
+        Color Scheme:
+            - Head: Green (0, 255, 0)
+            - Body: Yellow (0, 255, 255)
+            - Tail: Red (0, 0, 255)
+            - Skeleton line: Cyan (255, 255, 0)
         """
         annotated = frame.copy()
 
-        if not np.isnan(centroid[0]):
-            # Calculate offset if ROI cropping was applied
-            h, w = frame.shape[:2]
-            x_offset = int(w * roi_pct.get('left', 0) / 100) if roi_pct else 0
-            y_offset = int(h * roi_pct.get('top', 0) / 100) if roi_pct else 0
+        # Calculate offset if ROI cropping was applied
+        h, w = frame.shape[:2]
+        x_offset = int(w * roi_pct.get('left', 0) / 100) if roi_pct else 0
+        y_offset = int(h * roi_pct.get('top', 0) / 100) if roi_pct else 0
 
-            # Draw centroid marker
+        if body_parts is not None:
+            # Draw body parts with skeleton
+            head = (int(body_parts.head[0]) + x_offset,
+                    int(body_parts.head[1]) + y_offset)
+            body = (int(body_parts.body[0]) + x_offset,
+                    int(body_parts.body[1]) + y_offset)
+            tail = (int(body_parts.tail[0]) + x_offset,
+                    int(body_parts.tail[1]) + y_offset)
+
+            # Draw skeleton line (tail -> body -> head)
+            cv2.line(annotated, tail, body, (255, 255, 0), 2)
+            cv2.line(annotated, body, head, (255, 255, 0), 2)
+
+            # Draw tail (red)
+            cv2.circle(annotated, tail, 6, (255, 255, 255), 2)
+            cv2.circle(annotated, tail, 4, (0, 0, 255), -1)
+
+            # Draw body center (yellow)
+            cv2.circle(annotated, body, 8, (255, 255, 255), 2)
+            cv2.circle(annotated, body, 5, (0, 255, 255), -1)
+
+            # Draw head (green) - larger to emphasize
+            cv2.circle(annotated, head, 10, (255, 255, 255), 2)
+            cv2.circle(annotated, head, 7, (0, 255, 0), -1)
+
+            # Draw orientation indicator (arrow from body to head)
+            arrow_len = 20
+            angle_rad = np.radians(body_parts.orientation)
+            arrow_end = (
+                int(head[0] + arrow_len * np.cos(angle_rad)),
+                int(head[1] + arrow_len * np.sin(angle_rad))
+            )
+            cv2.arrowedLine(annotated, head, arrow_end, (0, 255, 0), 2, tipLength=0.4)
+
+            # Add label with confidence
+            label = f"Conf: {body_parts.confidence:.2f}"
+            cv2.putText(annotated, label, (10, 25),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+        elif not np.isnan(centroid[0]):
+            # Fallback: just draw centroid if no body parts detected
             cx = int(centroid[0]) + x_offset
             cy = int(centroid[1]) + y_offset
 

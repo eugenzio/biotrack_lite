@@ -447,7 +447,7 @@ def prepare_export_dataframe(
     Prepare the tracking data for CSV export with all computed columns.
 
     Args:
-        df: Raw DataFrame with 'frame', 'x', 'y' columns.
+        df: Raw DataFrame with 'frame', 'x', 'y' columns and optional body part columns.
         fps: Video frame rate.
         pixels_per_cm: Calibration factor.
 
@@ -458,6 +458,8 @@ def prepare_export_dataframe(
             - x_px, y_px: Position in pixels
             - x_cm, y_cm: Position in cm (from top-left origin)
             - velocity_cm_s: Instantaneous velocity
+            - (optional) head_x, head_y, body_x, body_y, tail_x, tail_y: Body part positions
+            - (optional) orientation, body_length, confidence: Body part metrics
     """
     export_df = df.copy()
 
@@ -476,7 +478,14 @@ def prepare_export_dataframe(
     if 'velocity_cm_s' not in export_df.columns:
         export_df['velocity_cm_s'] = calculate_velocity(export_df, fps, pixels_per_cm)
 
-    # Select and order columns for export
+    # Base columns for export
     columns = ['frame', 'time_s', 'x_px', 'y_px', 'x_cm', 'y_cm', 'velocity_cm_s']
+
+    # Add body part columns if present
+    body_part_cols = ['head_x', 'head_y', 'body_x', 'body_y', 'tail_x', 'tail_y',
+                      'orientation', 'body_length', 'confidence']
+    for col in body_part_cols:
+        if col in export_df.columns:
+            columns.append(col)
 
     return export_df[columns]
