@@ -119,15 +119,23 @@ PROFESSIONAL_THEME = """
     }
 
     /* Primary button - clean blue */
-    .stButton > button {
-        background: var(--accent-primary);
-        color: var(--bg-primary) !important;
+    .stButton > button, 
+    .stButton > button[kind="primary"],
+    div[data-testid="stButton"] > button {
+        background: var(--accent-primary) !important;
+        color: #ffffff !important;
         border: none;
         border-radius: 8px;
         font-weight: 600;
         padding: 0.75rem 1.5rem;
         transition: all 0.15s ease;
         font-size: 0.9rem;
+    }
+
+    /* Ensure text inside button is white */
+    .stButton > button p,
+    .stButton > button[kind="primary"] p {
+        color: #ffffff !important;
     }
 
     .stButton > button:hover {
@@ -350,13 +358,17 @@ def main():
 
     # Title (centered)
     st.markdown("""
-    <div style="text-align: center; margin-bottom: 2rem;">
-        <h1 style="margin-bottom: 0.5rem;">BioTrack-Lite</h1>
-        <p style="color: #8b949e; font-size: 0.95rem;">
-            Offline Behavioral Analysis System | MOG2 Background Subtraction
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+<div style="text-align: center; margin-bottom: 2rem;">
+<h1 style="margin-bottom: 0.5rem;">BioTrack-Lite</h1>
+<p style="color: #8b949e; font-size: 0.95rem; margin-bottom: 1.5rem;">
+Offline Behavioral Analysis System | MOG2 Background Subtraction
+</p>
+<div style="display: inline-flex; align-items: center; gap: 0.75rem; background: rgba(48, 54, 61, 0.5); border: 1px solid #30363d; padding: 0.75rem 1.5rem; border-radius: 50px;">
+<span style="color: #e6edf3; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.01em;">Designed for low-spec computers and Chromebooks</span>
+<img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg" width="24" alt="Chrome">
+</div>
+</div>
+""", unsafe_allow_html=True)
 
     # Check if we have completed analysis results to show
     if st.session_state.analysis_complete and st.session_state.tracking_data is not None:
