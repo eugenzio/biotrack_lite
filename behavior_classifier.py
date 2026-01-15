@@ -1,5 +1,5 @@
 """
-behavior_classifier.py - Rule-Based Behavior Classification for BioTrack-Lite
+behavior_classifier.py - Rule-Based Behavior Classification for Movyent
 
 This module implements behavior detection using interpretable rules based on
 pose geometry and velocity. No machine learning training required.

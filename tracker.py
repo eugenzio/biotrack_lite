@@ -1,5 +1,5 @@
 """
-tracker.py - Computer Vision Module for BioTrack-Lite
+tracker.py - Computer Vision Module for Movyent
 
 This module implements the RodentTracker class which uses MOG2 background
 subtraction to detect and track a single animal in a static arena.

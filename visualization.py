@@ -1,5 +1,5 @@
 """
-visualization.py - Plotting Module for BioTrack-Lite
+visualization.py - Plotting Module for Movyent
 
 This module provides publication-quality visualizations for behavioral data.
 All plots are designed to be interpretable and suitable for scientific
@@ -536,7 +536,7 @@ def plot_summary_dashboard(
         bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     )
 
-    plt.suptitle('BioTrack-Lite Analysis Summary', fontsize=16, fontweight='bold')
+    plt.suptitle('Movyent Analysis Summary', fontsize=16, fontweight='bold')
     plt.tight_layout(rect=[0, 0, 1, 0.96])
 
     return fig

@@ -1,5 +1,5 @@
 """
-pose_tracker.py - YOLOv8 Pose Estimation Module for BioTrack-Lite
+pose_tracker.py - YOLOv8 Pose Estimation Module for Movyent
 
 This module implements pose estimation using YOLOv8-Nano Pose model
 for single-animal tracking with keypoint detection.

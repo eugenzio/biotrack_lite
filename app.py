@@ -1,7 +1,7 @@
 """
-app.py - Professional Research Dashboard for BioTrack-Lite
+app.py - Professional Research Dashboard for Movyent
 
-This is the main entry point for the BioTrack-Lite application.
+This is the main entry point for the Movyent application.
 It provides a web-based interface for video analysis, parameter tuning,
 and result export.
 
@@ -333,7 +333,7 @@ def main():
 
     # Page configuration
     st.set_page_config(
-        page_title="BioTrack-Lite | Behavioral Analysis",
+        page_title="Movyent | Behavioral Analysis",
         page_icon="",
         layout="wide",
         initial_sidebar_state="collapsed"
@@ -359,7 +359,7 @@ def main():
     # Title (centered)
     st.markdown("""
 <div style="text-align: center; margin-bottom: 2rem;">
-<h1 style="margin-bottom: 0.5rem;">BioTrack-Lite</h1>
+<h1 style="margin-bottom: 0.5rem;">Movyent</h1>
 <p style="color: #8b949e; font-size: 0.95rem; margin-bottom: 1.5rem;">
 Offline Behavioral Analysis System | MOG2 Background Subtraction
 </p>
@@ -542,6 +542,24 @@ def show_analysis_results(temp_dir: str):
         secs = int(seconds % 60)
         return f"{mins:02d}:{secs:02d}"
 
+    # Callback for slider
+    def update_from_slider():
+        st.session_state.current_time = st.session_state.time_slider
+
+    # --- Playback Logic (Pre-render) ---
+    if st.session_state.is_playing:
+        playback_speed = st.session_state.get('playback_speed_val', 1.0)
+        time_step = (1.0 / fps) * playback_speed
+        next_time = st.session_state.current_time + time_step
+
+        if next_time >= total_duration:
+            st.session_state.is_playing = False
+            st.session_state.current_time = 0.0
+            st.session_state.time_slider = 0.0
+        else:
+            st.session_state.current_time = next_time
+            st.session_state.time_slider = next_time
+
     # --- Modern Media Player UI ---
     st.markdown("""
     <style>
@@ -553,28 +571,36 @@ def show_analysis_results(temp_dir: str):
             border: 1px solid #30363d;
         }
         .media-player-container .stButton > button {
-            background: transparent !important;
+            background: #21262d !important;
             color: #e6edf3 !important;
-            border: none !important;
-            font-size: 1.5rem;
-            padding: 0;
-            width: 48px;
-            height: 48px;
-            transition: all 0.2s ease;
+            border: 1px solid #30363d !important;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            min-width: 60px;
+            height: 36px;
+            transition: all 0.15s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .media-player-container .stButton > button:hover {
-            color: #58a6ff !important;
-            transform: scale(1.1);
+            background: #30363d !important;
+            border-color: #8b949e !important;
         }
         .media-player-container .stButton > button:active {
-            transform: scale(1.0);
+            background: #484f58 !important;
         }
-        /* Make play/pause button (3rd element in the controls row) larger */
-        .media-player-container [data-testid="stHorizontalBlock"] > div:nth-child(3) button {
-            font-size: 2.2rem !important;
+        /* Highlight play/pause button (4th column in controls row) */
+        .media-player-container [data-testid="stHorizontalBlock"] > div:nth-child(4) button {
+            background: #238636 !important;
+            border-color: #238636 !important;
+            min-width: 70px;
+        }
+        .media-player-container [data-testid="stHorizontalBlock"] > div:nth-child(4) button:hover {
+            background: #2ea043 !important;
+            border-color: #2ea043 !important;
         }
 
         /* Align all control columns vertically */
@@ -586,17 +612,18 @@ def show_analysis_results(temp_dir: str):
             gap: 0;
         }
         .media-player-container .stSelectbox > div > div {
-            background: transparent;
-            border: none;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
         }
-        .media-player-container .stSelectbox select {
-            color: #8b949e;
+        .media-player-container .stSelectbox label {
+            display: none;
         }
         .time-display {
             color: #8b949e;
             font-size: 0.8rem;
             font-family: 'IBM Plex Mono', monospace;
-            padding-top: 8px; /* Align with slider */
+            padding-top: 8px;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -610,14 +637,13 @@ def show_analysis_results(temp_dir: str):
             st.markdown(f'<div class="time-display" style="text-align: left;">{format_time(st.session_state.current_time)}</div>', unsafe_allow_html=True)
 
         with slider_cols[1]:
-            selected_time = st.slider(
+            st.slider(
                 "Time",
                 min_value=0.0,
                 max_value=total_duration,
-                value=st.session_state.current_time,
-                step=1.0 / fps,
-                format="",
                 key="time_slider",
+                on_change=update_from_slider,
+                format="",
                 label_visibility="collapsed"
             )
         
@@ -626,22 +652,32 @@ def show_analysis_results(temp_dir: str):
 
         # --- Playback Controls ---
         # Use columns for centering and layout
-        left_spacer, rewind_col, play_col, forward_col, speed_col, frame_col, right_spacer = st.columns([3, 1, 1, 1, 1, 2, 3])
+        left_spacer, restart_col, rewind_col, play_col, forward_col, speed_col, frame_col, right_spacer = st.columns([2, 1, 1, 1, 1, 1, 2, 2])
+
+        with restart_col:
+            if st.button("Restart", key="restart_btn", icon=":material/skip_previous:", use_container_width=True, help="Return to start"):
+                st.session_state.current_time = 0.0
+                st.session_state.time_slider = 0.0
+                st.session_state.is_playing = False
+                st.rerun()
 
         with rewind_col:
-            if st.button("⏮", key="rewind_btn_icon", use_container_width=True, help="Rewind 5s"):
+            if st.button("-5s", key="rewind_btn", icon=":material/fast_rewind:", use_container_width=True, help="Rewind 5 seconds"):
                 st.session_state.current_time = max(0, st.session_state.current_time - 5)
+                st.session_state.time_slider = st.session_state.current_time
                 st.rerun()
-        
+
         with play_col:
-            play_icon = '⏸' if st.session_state.is_playing else '▶'
-            if st.button(play_icon, key="play_pause_btn_icon", use_container_width=True, help="Play/Pause"):
+            play_label = "Pause" if st.session_state.is_playing else "Play"
+            play_icon = ":material/pause:" if st.session_state.is_playing else ":material/play_arrow:"
+            if st.button(play_label, key="play_pause_btn", icon=play_icon, use_container_width=True, help="Play/Pause"):
                 st.session_state.is_playing = not st.session_state.is_playing
                 st.rerun()
 
         with forward_col:
-            if st.button("⏭", key="forward_btn_icon", use_container_width=True, help="Forward 5s"):
+            if st.button("+5s", key="forward_btn", icon=":material/fast_forward:", use_container_width=True, help="Forward 5 seconds"):
                 st.session_state.current_time = min(total_duration, st.session_state.current_time + 5)
+                st.session_state.time_slider = st.session_state.current_time
                 st.rerun()
 
         with speed_col:
@@ -650,21 +686,20 @@ def show_analysis_results(temp_dir: str):
                 options=[0.25, 0.5, 1.0, 2.0, 4.0],
                 index=2,
                 format_func=lambda x: f"{x}x",
-                key="playback_speed",
+                key="playback_speed_val",
                 label_visibility="collapsed"
             )
 
         with frame_col:
-            st.markdown(f'<div class="time-display" style="text-align: right; padding-top: 14px;">Frame {int(st.session_state.current_time * fps):,}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="time-display" style="text-align: right; padding-top: 10px;">Frame {int(st.session_state.current_time * fps):,}</div>', unsafe_allow_html=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Update current_time if slider moved manually
-    if not st.session_state.is_playing:
-        st.session_state.current_time = selected_time
+    # Ensure current_time is within valid bounds
+    st.session_state.current_time = max(0.0, min(st.session_state.current_time, total_duration))
 
     # Convert time to frame
-    selected_frame = int(selected_time * fps)
+    selected_frame = int(st.session_state.current_time * fps)
     selected_frame = min(selected_frame, total_frames - 1)
 
     # Re-open video to get selected frame
@@ -728,19 +763,12 @@ def show_analysis_results(temp_dir: str):
 
     # Handle playback
     if st.session_state.is_playing:
-        # Calculate next time step based on playback speed
-        time_step = (1.0 / fps) * playback_speed * 3  # Multiply by 3 for smoother playback
-        next_time = st.session_state.current_time + time_step
-
-        if next_time >= total_duration:
-            # Stop at end
-            st.session_state.is_playing = False
-            st.session_state.current_time = 0.0
-        else:
-            st.session_state.current_time = next_time
-
-        # Small delay for visual update
-        time.sleep(0.05)
+        # Sleep to control playback speed
+        # Account for estimated processing overhead (~30ms)
+        target_frame_time = (1.0 / fps) / playback_speed
+        processing_overhead = 0.03
+        sleep_time = max(0.01, target_frame_time - processing_overhead)
+        time.sleep(sleep_time)
         st.rerun()
 
     # Create DataFrame and calculate metrics
@@ -792,6 +820,45 @@ def show_analysis_results(temp_dir: str):
 
 def show_welcome_screen():
     """Display welcome screen when no video is loaded."""
+
+    # What is Movyent? expandable section
+    with st.expander("What is Movyent?", expanded=False):
+        st.markdown("""
+        **Movyent** is a browser-based behavioral tracking platform that helps students and labs
+        quantify animal movement on low-spec devices.
+
+        #### Who It's For
+        - Undergraduate and graduate students
+        - Teaching labs with limited budgets
+        - Research labs starting behavior experiments
+        - Schools using Chromebooks
+
+        #### What It Does
+        - Track animal movement using computer vision
+        - Calculate distance, velocity, and zone metrics
+        - Detect freezing behavior automatically
+        - Export data to CSV/Excel
+        - Works 100% offline
+
+        #### Why It Matters
+        - Runs on Chromebooks and low-spec laptops
+        - No GPU required
+        - Free and open source
+        - Reproducible research results
+        - Accessible to underfunded labs
+
+        #### How It Works
+        1. **Upload Video** - Upload video of your behavioral arena
+        2. **Track** - Movyent tracks the animal frame-by-frame
+        3. **Analyze** - Analyze metrics and export your data
+
+        #### FAQ
+        - **What animals can I track?** Mice, rats, Drosophila, zebrafish, and other small animals with good contrast against the arena.
+        - **Does it work offline?** Yes, 100% offline. Your data never leaves your computer.
+        - **What file formats are supported?** MP4, AVI, and MOV video files up to 200MB.
+        - **Do I need a powerful computer?** No. Movyent is optimized for Chromebooks and low-spec devices.
+        - **Is it free?** Yes, Movyent is free and open source.
+        """)
 
     # Feature cards below
     st.markdown("<br>", unsafe_allow_html=True)
@@ -1208,7 +1275,7 @@ def display_results(
         st.download_button(
             label="Download All Figures (ZIP)",
             data=create_figures_zip(all_figures),
-            file_name="biotrack_figures.zip",
+            file_name="movyent_figures.zip",
             mime="application/zip",
             use_container_width=True
         )
@@ -1263,7 +1330,7 @@ def display_results(
         st.download_button(
             label="All Data (Excel)",
             data=excel_buffer.getvalue(),
-            file_name="biotrack_results.xlsx",
+            file_name="movyent_results.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True
         )

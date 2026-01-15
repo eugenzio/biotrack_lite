@@ -1,5 +1,5 @@
 """
-metrics.py - Quantitative Behavioral Analysis Module for BioTrack-Lite
+metrics.py - Quantitative Behavioral Analysis Module for Movyent
 
 This module provides functions to calculate ethologically relevant metrics
 from tracked position data. All calculations use vectorized NumPy operations
