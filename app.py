@@ -48,26 +48,39 @@ PROFESSIONAL_THEME = """
 
     /* CSS Variables for consistent theming */
     :root {
-        --bg-primary: #0d1117;
-        --bg-secondary: #161b22;
-        --bg-tertiary: #21262d;
-        --bg-hover: #30363d;
-        --border-primary: #30363d;
-        --border-secondary: #21262d;
-        --text-primary: #e6edf3;
-        --text-secondary: #8b949e;
-        --text-muted: #6e7681;
-        --accent-primary: #58a6ff;
-        --accent-secondary: #388bfd;
-        --accent-success: #3fb950;
-        --accent-warning: #d29922;
-        --accent-danger: #f85149;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8f9fa;
+        --bg-tertiary: #e9ecef;
+        --bg-hover: #dee2e6;
+        --border-primary: #dee2e6;
+        --border-secondary: #e9ecef;
+        --text-primary: #000000;
+        --text-secondary: #4a5568;
+        --text-muted: #718096;
+        --accent-primary: #2563eb;
+        --accent-secondary: #1d4ed8;
+        --accent-success: #10b981;
+        --accent-warning: #f59e0b;
+        --accent-danger: #ef4444;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes buttonClick {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.95); }
+        100% { transform: scale(1); }
     }
 
     /* Main app background */
     .stApp {
         background: var(--bg-primary);
         font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        animation: fadeIn 0.8s ease-out;
     }
 
     /* Hide sidebar completely */
@@ -128,7 +141,7 @@ PROFESSIONAL_THEME = """
         border-radius: 8px;
         font-weight: 600;
         padding: 0.75rem 1.5rem;
-        transition: all 0.15s ease;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         font-size: 0.9rem;
     }
 
@@ -140,11 +153,12 @@ PROFESSIONAL_THEME = """
 
     .stButton > button:hover {
         background: var(--accent-secondary);
-        transform: translateY(-1px);
+        transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
     }
 
     .stButton > button:active {
+        animation: buttonClick 0.2s ease-in-out;
         transform: translateY(0);
     }
 
@@ -199,17 +213,35 @@ PROFESSIONAL_THEME = """
         border-top: none;
     }
 
-    /* File uploader - clean */
+    /* File uploader - WHITE BOX, BLACK TEXT */
     [data-testid="stFileUploader"] {
-        background: var(--bg-secondary);
-        border: 2px dashed var(--border-primary);
+        background: #ffffff !important;
+        border: 2px dashed #ccc !important;
         border-radius: 12px;
         padding: 2rem;
+        color: #000000 !important;
+    }
+
+    [data-testid="stFileUploader"] section {
+        background: #ffffff !important;
+    }
+    
+    [data-testid="stFileUploader"] .stMarkdown,
+    [data-testid="stFileUploader"] p,
+    [data-testid="stFileUploader"] span,
+    [data-testid="stFileUploader"] label,
+    [data-testid="stFileUploader"] small {
+        color: #000000 !important;
+    }
+
+    [data-testid="stFileUploader"] button {
+        color: #000000 !important;
+        border-color: #ccc !important;
+        background: #f8f9fa !important;
     }
 
     [data-testid="stFileUploader"]:hover {
-        border-color: var(--accent-primary);
-        background: var(--bg-tertiary);
+        border-color: var(--accent-primary) !important;
     }
 
     /* Sliders - refined */
@@ -279,14 +311,22 @@ PROFESSIONAL_THEME = """
         color: var(--text-secondary) !important;
     }
 
-    /* Image containers */
+    /* Image containers - WHITE BOX */
     [data-testid="stImage"] {
         border-radius: 12px;
         overflow: hidden;
-        border: 1px solid var(--border-primary);
+        border: 1px solid #ccc;
+        background: #ffffff !important;
+        padding: 10px;
+    }
+    
+    [data-testid="stImage"] caption, 
+    [data-testid="stImage"] .stCaption {
+        color: #000000 !important;
+        font-weight: 500;
     }
 
-    /* Caption */
+    /* Caption (Global fallback) */
     .stCaption {
         color: var(--text-muted) !important;
         font-size: 0.8rem;
@@ -324,6 +364,77 @@ PROFESSIONAL_THEME = """
     ::-webkit-scrollbar-thumb:hover {
         background: var(--text-muted);
     }
+
+    /* MEDIA PLAYER SPECIAL STYLING */
+    .media-player-container {
+        background: #ffffff !important;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin: 1rem 0;
+        border: 1px solid #e0e0e0 !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .media-player-container .time-display {
+        color: #000000 !important;
+        font-family: 'IBM Plex Mono', monospace;
+        font-weight: 600;
+        padding-top: 8px;
+    }
+    
+    .media-player-container .stButton > button {
+        background: #f8f9fa !important;
+        color: #000000 !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+        min-width: 60px;
+        height: 36px;
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .media-player-container .stButton > button:hover {
+        background: #e9ecef !important;
+        border-color: #ced4da !important;
+        transform: translateY(-1px);
+    }
+    
+    .media-player-container .stButton > button:active {
+        background: #dde2e6 !important;
+        transform: translateY(0);
+    }
+
+    /* Highlight play/pause button override */
+    .media-player-container [data-testid="stHorizontalBlock"] > div:nth-child(4) button {
+        background: #238636 !important;
+        border-color: #238636 !important;
+        color: #ffffff !important;
+        min-width: 70px;
+    }
+    
+    .media-player-container [data-testid="stHorizontalBlock"] > div:nth-child(4) button p {
+        color: #ffffff !important;
+    }
+
+    .media-player-container [data-testid="stHorizontalBlock"] > div:nth-child(4) button:hover {
+        background: #2ea043 !important;
+        border-color: #2ea043 !important;
+    }
+    
+    .media-player-container .stSelectbox > div > div {
+        background: #f8f9fa !important;
+        border: 1px solid #dee2e6 !important;
+        color: #000000 !important;
+    }
+    
+    .media-player-container .stSelectbox div[data-baseweb="select"] span {
+        color: #000000 !important;
+    }
 </style>
 """
 
@@ -360,11 +471,11 @@ def main():
     st.markdown("""
 <div style="text-align: center; margin-bottom: 2rem;">
 <h1 style="margin-bottom: 0.5rem;">Movyent</h1>
-<p style="color: #8b949e; font-size: 0.95rem; margin-bottom: 1.5rem;">
-Offline Behavioral Analysis System | MOG2 Background Subtraction
+<p style="color: #4a5568; font-size: 0.95rem; margin-bottom: 1.5rem;">
+Behavioral Analysis System | MOG2 Background Subtraction
 </p>
-<div style="display: inline-flex; align-items: center; gap: 0.75rem; background: rgba(48, 54, 61, 0.5); border: 1px solid #30363d; padding: 0.75rem 1.5rem; border-radius: 50px;">
-<span style="color: #e6edf3; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.01em;">Designed for low-spec computers and Chromebooks</span>
+<div style="display: inline-flex; align-items: center; gap: 0.75rem; background: rgba(233, 236, 239, 0.8); border: 1px solid #dee2e6; padding: 0.75rem 1.5rem; border-radius: 50px;">
+<span style="color: #000000; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.01em;">Designed for low-spec computers and Chromebooks</span>
 <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg" width="24" alt="Chrome">
 </div>
 </div>
@@ -416,11 +527,11 @@ Offline Behavioral Analysis System | MOG2 Background Subtraction
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown(f"""
-        <div style="background: #161b22; padding: 1rem; border-radius: 12px; margin: 1rem 0; text-align: center; border: 1px solid #30363d;">
-            <div style="color: #3fb950; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">
+        <div style="background: #ffffff; padding: 1rem; border-radius: 12px; margin: 1rem 0; text-align: center; border: 1px solid #dee2e6;">
+            <div style="color: #38a169; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">
                 Video Loaded
             </div>
-            <div style="color: #8b949e; font-family: 'IBM Plex Mono', monospace;">
+            <div style="color: #000000; font-family: 'IBM Plex Mono', monospace;">
                 {total_frames:,} frames | {duration_s:.1f}s | {frame_width}x{frame_height}
             </div>
         </div>
@@ -555,25 +666,23 @@ def show_analysis_results(temp_dir: str):
         if next_time >= total_duration:
             st.session_state.is_playing = False
             st.session_state.current_time = 0.0
-            st.session_state.time_slider = 0.0
         else:
             st.session_state.current_time = next_time
-            st.session_state.time_slider = next_time
 
     # --- Modern Media Player UI ---
     st.markdown("""
     <style>
         .media-player-container {
-            background: #161b22;
+            background: #ffffff;
             border-radius: 12px;
             padding: 1rem 1.5rem;
             margin: 1rem 0;
-            border: 1px solid #30363d;
+            border: 1px solid #dee2e6;
         }
         .media-player-container .stButton > button {
-            background: #21262d !important;
-            color: #e6edf3 !important;
-            border: 1px solid #30363d !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #dee2e6 !important;
             border-radius: 6px;
             font-size: 0.85rem;
             font-weight: 500;
@@ -586,21 +695,22 @@ def show_analysis_results(temp_dir: str):
             justify-content: center;
         }
         .media-player-container .stButton > button:hover {
-            background: #30363d !important;
-            border-color: #8b949e !important;
+            background: #f8f9fa !important;
+            border-color: #4a5568 !important;
         }
         .media-player-container .stButton > button:active {
-            background: #484f58 !important;
+            background: #e9ecef !important;
         }
         /* Highlight play/pause button (4th column in controls row) */
         .media-player-container [data-testid="stHorizontalBlock"] > div:nth-child(4) button {
-            background: #238636 !important;
-            border-color: #238636 !important;
+            background: #38a169 !important;
+            border-color: #38a169 !important;
+            color: #ffffff !important;
             min-width: 70px;
         }
         .media-player-container [data-testid="stHorizontalBlock"] > div:nth-child(4) button:hover {
-            background: #2ea043 !important;
-            border-color: #2ea043 !important;
+            background: #2f855a !important;
+            border-color: #2f855a !important;
         }
 
         /* Align all control columns vertically */
@@ -612,17 +722,17 @@ def show_analysis_results(temp_dir: str):
             gap: 0;
         }
         .media-player-container .stSelectbox > div > div {
-            background: #21262d;
-            border: 1px solid #30363d;
+            background: #ffffff;
+            border: 1px solid #dee2e6;
             border-radius: 6px;
         }
         .media-player-container .stSelectbox label {
             display: none;
         }
         .time-display {
-            color: #8b949e;
+            color: #000000;
             font-size: 0.8rem;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: 'JetBrains Mono', monospace;
             padding-top: 8px;
         }
     </style>
@@ -641,6 +751,7 @@ def show_analysis_results(temp_dir: str):
                 "Time",
                 min_value=0.0,
                 max_value=total_duration,
+                value=st.session_state.current_time,
                 key="time_slider",
                 on_change=update_from_slider,
                 format="",
@@ -657,14 +768,12 @@ def show_analysis_results(temp_dir: str):
         with restart_col:
             if st.button("Restart", key="restart_btn", icon=":material/skip_previous:", use_container_width=True, help="Return to start"):
                 st.session_state.current_time = 0.0
-                st.session_state.time_slider = 0.0
                 st.session_state.is_playing = False
                 st.rerun()
 
         with rewind_col:
             if st.button("-5s", key="rewind_btn", icon=":material/fast_rewind:", use_container_width=True, help="Rewind 5 seconds"):
                 st.session_state.current_time = max(0, st.session_state.current_time - 5)
-                st.session_state.time_slider = st.session_state.current_time
                 st.rerun()
 
         with play_col:
@@ -677,7 +786,6 @@ def show_analysis_results(temp_dir: str):
         with forward_col:
             if st.button("+5s", key="forward_btn", icon=":material/fast_forward:", use_container_width=True, help="Forward 5 seconds"):
                 st.session_state.current_time = min(total_duration, st.session_state.current_time + 5)
-                st.session_state.time_slider = st.session_state.current_time
                 st.rerun()
 
         with speed_col:
@@ -867,10 +975,10 @@ def show_welcome_screen():
 
     with col1:
         st.markdown("""
-        <div style="background: #161b22; padding: 1.5rem; border-radius: 12px;
-                    border: 1px solid #30363d; height: 160px;">
-            <h4 style="color: #e6edf3; margin-bottom: 0.75rem; font-weight: 600;">MOG2 Tracking</h4>
-            <p style="color: #8b949e; font-size: 0.9rem; line-height: 1.5;">
+        <div style="background: #ffffff; padding: 1.5rem; border-radius: 12px;
+                    border: 1px solid #dee2e6; height: 160px;">
+            <h4 style="color: #000000; margin-bottom: 0.75rem; font-weight: 600;">MOG2 Tracking</h4>
+            <p style="color: #4a5568; font-size: 0.9rem; line-height: 1.5;">
                 Classical background subtraction algorithm.
                 CPU-friendly, no GPU required.
             </p>
@@ -879,10 +987,10 @@ def show_welcome_screen():
 
     with col2:
         st.markdown("""
-        <div style="background: #161b22; padding: 1.5rem; border-radius: 12px;
-                    border: 1px solid #30363d; height: 160px;">
-            <h4 style="color: #e6edf3; margin-bottom: 0.75rem; font-weight: 600;">Behavioral Metrics</h4>
-            <p style="color: #8b949e; font-size: 0.9rem; line-height: 1.5;">
+        <div style="background: #ffffff; padding: 1.5rem; border-radius: 12px;
+                    border: 1px solid #dee2e6; height: 160px;">
+            <h4 style="color: #000000; margin-bottom: 0.75rem; font-weight: 600;">Behavioral Metrics</h4>
+            <p style="color: #4a5568; font-size: 0.9rem; line-height: 1.5;">
                 Distance, velocity, thigmotaxis, freezing detection,
                 zone crossings.
             </p>
@@ -891,10 +999,10 @@ def show_welcome_screen():
 
     with col3:
         st.markdown("""
-        <div style="background: #161b22; padding: 1.5rem; border-radius: 12px;
-                    border: 1px solid #30363d; height: 160px;">
-            <h4 style="color: #e6edf3; margin-bottom: 0.75rem; font-weight: 600;">Data Export</h4>
-            <p style="color: #8b949e; font-size: 0.9rem; line-height: 1.5;">
+        <div style="background: #ffffff; padding: 1.5rem; border-radius: 12px;
+                    border: 1px solid #dee2e6; height: 160px;">
+            <h4 style="color: #000000; margin-bottom: 0.75rem; font-weight: 600;">Data Export</h4>
+            <p style="color: #4a5568; font-size: 0.9rem; line-height: 1.5;">
                 Export tracking data and statistics
                 to CSV or Excel.
             </p>

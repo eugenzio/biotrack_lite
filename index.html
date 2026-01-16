@@ -55,29 +55,128 @@
         html {
             scroll-behavior: smooth;
         }
+
+        /* Page load animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.5s ease-out forwards;
+        }
+
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        .delay-600 { animation-delay: 0.6s; }
+
+        /* Initially hidden for animation */
+        .animate-on-load {
+            opacity: 0;
+        }
+
+        /* Button click animations */
+        .btn-animate {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-animate:active {
+            transform: scale(0.95);
+        }
+
+        .btn-animate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Ripple effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple-effect 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Card hover animations */
+        .card-animate {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-animate:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Stagger animations for sections */
+        section {
+            animation: fadeIn 0.8s ease-out;
+        }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors duration-300">
 
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-100 dark:border-border-dark">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-100 dark:border-border-dark animate-fade-in">
         <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
             <a href="#" class="flex items-center gap-2">
                 <span class="material-icons-round text-2xl text-primary dark:text-white">analytics</span>
                 <span class="text-xl font-bold text-slate-900 dark:text-white">Movyent</span>
             </a>
             <div class="hidden md:flex items-center gap-8">
-                <a href="#about" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">What is Movyent?</a>
-                <a href="#features" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Features</a>
-                <a href="#how-it-works" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">How it Works</a>
-                <a href="#get-started" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Get Started</a>
+                <a href="#about" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/70 dark:hover:text-white transition-colors">What is Movyent?</a>
+                <a href="#features" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/70 dark:hover:text-white transition-colors">Features</a>
+                <a href="#how-it-works" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/70 dark:hover:text-white transition-colors">How it Works</a>
+                <a href="#get-started" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-white/70 dark:hover:text-white transition-colors">Get Started</a>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                    <span class="material-icons-round text-xl text-slate-600 dark:text-slate-400 block dark:hidden">dark_mode</span>
-                    <span class="material-icons-round text-xl text-slate-400 hidden dark:block">light_mode</span>
+                <button onclick="document.documentElement.classList.toggle('dark')" class="btn-animate p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <span class="material-icons-round text-xl text-slate-600 dark:text-white/70 block dark:hidden">dark_mode</span>
+                    <span class="material-icons-round text-xl text-slate-400 dark:text-white/70 hidden dark:block">light_mode</span>
                 </button>
-                <a href="#get-started" class="hidden sm:inline-flex px-4 py-2 bg-primary hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors">
+                <a href="#get-started" class="btn-animate hidden sm:inline-flex px-4 py-2 bg-primary hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors">
                     Launch App
                 </a>
             </div>
@@ -87,8 +186,8 @@
     <!-- Hero Section -->
     <section class="min-h-screen flex flex-col items-center justify-center px-6 pt-20">
         <div class="max-w-4xl mx-auto text-center space-y-8">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-[#21262d] border border-slate-200 dark:border-border-dark">
-                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-[#21262d] border border-slate-200 dark:border-border-dark animate-on-load animate-fade-in-up delay-100">
+                <span class="text-xs font-semibold text-slate-700 dark:text-white">
                     Designed for low-spec computers and Chromebooks
                 </span>
                 <svg class="w-5 h-5" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -101,26 +200,26 @@
                 </svg>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight animate-on-load animate-fade-in-up delay-200">
                 Behavioral Analysis<br/>
                 <span class="text-slate-400 dark:text-slate-500">Made Simple</span>
             </h1>
 
-            <p class="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            <p class="text-lg md:text-xl text-slate-600 dark:text-white/80 max-w-2xl mx-auto leading-relaxed animate-on-load animate-fade-in-up delay-300">
                 Free, offline behavioral tracking using MOG2 background subtraction.
                 No GPU required. Perfect for research labs with limited resources.
             </p>
 
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <a href="#get-started" class="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-slate-700 text-white font-medium rounded-lg transition-all hover:shadow-lg">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-on-load animate-fade-in-up delay-400">
+                <a href="#get-started" class="btn-animate w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-slate-700 text-white font-medium rounded-lg transition-all hover:shadow-lg">
                     Get Started Free
                 </a>
-                <a href="#how-it-works" class="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-all hover:border-slate-300 dark:hover:border-slate-600">
+                <a href="#how-it-works" class="btn-animate w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-white font-medium rounded-lg transition-all hover:border-slate-300 dark:hover:border-slate-600">
                     See How it Works
                 </a>
             </div>
 
-            <div class="flex items-center justify-center gap-8 pt-8 text-sm text-slate-500 dark:text-slate-400">
+            <div class="flex items-center justify-center gap-8 pt-8 text-sm text-slate-500 dark:text-white/70 animate-on-load animate-fade-in-up delay-500">
                 <div class="flex items-center gap-2">
                     <span class="material-icons-round text-green-500 text-lg">check_circle</span>
                     <span>100% Offline</span>
@@ -149,44 +248,44 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
                     Everything You Need for Behavioral Analysis
                 </h2>
-                <p class="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                <p class="text-slate-600 dark:text-white/70 max-w-2xl mx-auto">
                     Powerful tracking capabilities optimized for standard hardware. No expensive equipment required.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="group p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
+                <div class="group card-animate p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
                     <div class="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-6">
                         <span class="material-icons-round text-blue-600 dark:text-blue-400">visibility</span>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-3">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">
                         MOG2 Tracking
                     </h3>
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p class="text-slate-600 dark:text-white/70 leading-relaxed">
                         Classical background subtraction algorithm. CPU-friendly, no GPU required for efficient processing on standard hardware.
                     </p>
                 </div>
 
-                <div class="group p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
+                <div class="group card-animate p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
                     <div class="w-12 h-12 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center mb-6">
                         <span class="material-icons-round text-purple-600 dark:text-purple-400">assessment</span>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-3">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">
                         Behavioral Metrics
                     </h3>
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p class="text-slate-600 dark:text-white/70 leading-relaxed">
                         Automated calculation of distance, velocity, thigmotaxis, freezing detection, and custom zone crossings.
                     </p>
                 </div>
 
-                <div class="group p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
+                <div class="group card-animate p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
                     <div class="w-12 h-12 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center mb-6">
                         <span class="material-icons-round text-green-600 dark:text-green-400">download</span>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-3">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">
                         Data Export
                     </h3>
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p class="text-slate-600 dark:text-white/70 leading-relaxed">
                         Seamlessly export tracking data coordinates and calculated statistics to CSV or Excel formats for further analysis.
                     </p>
                 </div>
@@ -194,26 +293,26 @@
 
             <!-- Additional features row -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div class="group p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
+                <div class="group card-animate p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
                     <div class="w-12 h-12 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center mb-6">
                         <span class="material-icons-round text-orange-600 dark:text-orange-400">speed</span>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-3">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">
                         Real-Time Processing
                     </h3>
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p class="text-slate-600 dark:text-white/70 leading-relaxed">
                         Process videos in real-time with visual feedback. Watch as the tracker identifies and follows subjects frame by frame.
                     </p>
                 </div>
 
-                <div class="group p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
+                <div class="group card-animate p-8 rounded-xl bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark shadow-soft hover:shadow-md dark:shadow-none dark:hover:border-slate-600 transition-all duration-300">
                     <div class="w-12 h-12 rounded-lg bg-pink-50 dark:bg-pink-900/20 flex items-center justify-center mb-6">
                         <span class="material-icons-round text-pink-600 dark:text-pink-400">security</span>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-3">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">
                         Complete Privacy
                     </h3>
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p class="text-slate-600 dark:text-white/70 leading-relaxed">
                         All processing happens locally on your machine. Your data never leaves your computer. Perfect for sensitive research.
                     </p>
                 </div>
@@ -228,7 +327,7 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
                     How It Works
                 </h2>
-                <p class="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                <p class="text-slate-600 dark:text-white/70 max-w-2xl mx-auto">
                     Get from video to behavioral data in three simple steps
                 </p>
             </div>
@@ -239,7 +338,7 @@
                         <span class="text-2xl font-bold text-slate-900 dark:text-white">1</span>
                     </div>
                     <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Upload Video</h3>
-                    <p class="text-slate-600 dark:text-slate-400">
+                    <p class="text-slate-600 dark:text-white/70">
                         Drag and drop your video file. Supports MP4, AVI, MOV, and MPEG4 formats up to 200MB.
                     </p>
                 </div>
@@ -249,7 +348,7 @@
                         <span class="text-2xl font-bold text-slate-900 dark:text-white">2</span>
                     </div>
                     <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Define Zones</h3>
-                    <p class="text-slate-600 dark:text-slate-400">
+                    <p class="text-slate-600 dark:text-white/70">
                         Draw regions of interest on your arena. Set up center zones, periphery, and custom areas.
                     </p>
                 </div>
@@ -259,7 +358,7 @@
                         <span class="text-2xl font-bold text-slate-900 dark:text-white">3</span>
                     </div>
                     <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Export Results</h3>
-                    <p class="text-slate-600 dark:text-slate-400">
+                    <p class="text-slate-600 dark:text-white/70">
                         Run the analysis and download comprehensive behavioral metrics in CSV or Excel format.
                     </p>
                 </div>
@@ -274,7 +373,7 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
                     Ready to Get Started?
                 </h2>
-                <p class="text-slate-600 dark:text-slate-400">
+                <p class="text-slate-600 dark:text-white/70">
                     Upload your first video and start analyzing behavior in minutes
                 </p>
             </div>
@@ -282,19 +381,19 @@
             <div class="p-4 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700/50 transition-colors">
                 <div class="bg-white dark:bg-background-dark rounded-lg p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-100 dark:border-border-dark shadow-sm">
                     <div class="flex items-center gap-4 md:gap-6 flex-1">
-                        <div class="p-4 bg-surface-light dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500">
+                        <div class="p-4 bg-surface-light dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-white/50">
                             <span class="material-icons-round text-4xl">cloud_upload</span>
                         </div>
                         <div class="text-left">
-                            <h3 class="text-lg md:text-xl font-semibold text-slate-800 dark:text-slate-200">
+                            <h3 class="text-lg md:text-xl font-semibold text-slate-800 dark:text-white">
                                 Drag and drop file here
                             </h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 font-mono mt-1">
+                            <p class="text-sm text-slate-500 dark:text-white/60 font-mono mt-1">
                                 Limit 200MB per file &bull; MP4, AVI, MOV, MPEG4
                             </p>
                         </div>
                     </div>
-                    <button class="shrink-0 px-6 py-3 bg-primary hover:bg-slate-700 text-white font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:focus:ring-offset-background-dark">
+                    <button class="btn-animate shrink-0 px-6 py-3 bg-primary hover:bg-slate-700 text-white font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:focus:ring-offset-background-dark">
                         Browse files
                     </button>
                 </div>
@@ -310,7 +409,7 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6">
                     What is Movyent?
                 </h2>
-                <p class="text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mx-auto">
+                <p class="text-xl text-slate-600 dark:text-white/70 leading-relaxed max-w-3xl mx-auto">
                     Movyent is a browser-based behavioral tracking platform that helps students and labs quantify animal movement on low-spec devices.
                 </p>
             </div>
@@ -320,20 +419,20 @@
                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Who It's For</h3>
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
-                        <span class="material-icons-round text-slate-400 mb-2">school</span>
-                        <p class="text-slate-700 dark:text-slate-300">Undergraduate and graduate students</p>
+                        <span class="material-icons-round text-slate-400 dark:text-white/50 mb-2">school</span>
+                        <p class="text-slate-700 dark:text-white">Undergraduate and graduate students</p>
                     </div>
                     <div class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
-                        <span class="material-icons-round text-slate-400 mb-2">science</span>
-                        <p class="text-slate-700 dark:text-slate-300">Teaching labs with limited budgets</p>
+                        <span class="material-icons-round text-slate-400 dark:text-white/50 mb-2">science</span>
+                        <p class="text-slate-700 dark:text-white">Teaching labs with limited budgets</p>
                     </div>
                     <div class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
-                        <span class="material-icons-round text-slate-400 mb-2">biotech</span>
-                        <p class="text-slate-700 dark:text-slate-300">Research labs starting behavior experiments</p>
+                        <span class="material-icons-round text-slate-400 dark:text-white/50 mb-2">biotech</span>
+                        <p class="text-slate-700 dark:text-white">Research labs starting behavior experiments</p>
                     </div>
                     <div class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
-                        <span class="material-icons-round text-slate-400 mb-2">laptop_chromebook</span>
-                        <p class="text-slate-700 dark:text-slate-300">Schools using Chromebooks</p>
+                        <span class="material-icons-round text-slate-400 dark:text-white/50 mb-2">laptop_chromebook</span>
+                        <p class="text-slate-700 dark:text-white">Schools using Chromebooks</p>
                     </div>
                 </div>
             </div>
@@ -342,23 +441,23 @@
             <div class="mb-16">
                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">What It Does</h3>
                 <ul class="space-y-3">
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-green-500">check_circle</span>
                         Track animal movement using computer vision
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-green-500">check_circle</span>
                         Calculate distance, velocity, and zone metrics
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-green-500">check_circle</span>
                         Detect freezing behavior automatically
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-green-500">check_circle</span>
                         Export data to CSV/Excel
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-green-500">check_circle</span>
                         Works 100% offline
                     </li>
@@ -369,25 +468,25 @@
             <div class="mb-16">
                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Why It Matters</h3>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
+                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark card-animate">
                         <span class="material-icons-round text-3xl text-blue-500 mb-3">laptop_chromebook</span>
-                        <p class="text-slate-700 dark:text-slate-300">Runs on Chromebooks and low-spec laptops</p>
+                        <p class="text-slate-700 dark:text-white">Runs on Chromebooks and low-spec laptops</p>
                     </div>
-                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
+                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark card-animate">
                         <span class="material-icons-round text-3xl text-purple-500 mb-3">memory</span>
-                        <p class="text-slate-700 dark:text-slate-300">No GPU required</p>
+                        <p class="text-slate-700 dark:text-white">No GPU required</p>
                     </div>
-                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
+                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark card-animate">
                         <span class="material-icons-round text-3xl text-green-500 mb-3">volunteer_activism</span>
-                        <p class="text-slate-700 dark:text-slate-300">Free and open source</p>
+                        <p class="text-slate-700 dark:text-white">Free and open source</p>
                     </div>
-                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
+                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark card-animate">
                         <span class="material-icons-round text-3xl text-orange-500 mb-3">verified</span>
-                        <p class="text-slate-700 dark:text-slate-300">Reproducible research results</p>
+                        <p class="text-slate-700 dark:text-white">Reproducible research results</p>
                     </div>
-                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
+                    <div class="text-center p-6 rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark card-animate">
                         <span class="material-icons-round text-3xl text-pink-500 mb-3">accessibility_new</span>
-                        <p class="text-slate-700 dark:text-slate-300">Accessible to underfunded labs</p>
+                        <p class="text-slate-700 dark:text-white">Accessible to underfunded labs</p>
                     </div>
                 </div>
             </div>
@@ -396,20 +495,20 @@
             <div class="mb-16">
                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">How It Works</h3>
                 <div class="flex flex-col md:flex-row gap-6">
-                    <div class="flex-1 text-center p-6 rounded-xl border-2 border-slate-200 dark:border-border-dark">
+                    <div class="flex-1 text-center p-6 rounded-xl border-2 border-slate-200 dark:border-border-dark card-animate">
                         <div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">1</div>
                         <h4 class="font-semibold text-slate-900 dark:text-white mb-2">Upload Video</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400">Upload video of your behavioral arena</p>
+                        <p class="text-sm text-slate-600 dark:text-white/70">Upload video of your behavioral arena</p>
                     </div>
-                    <div class="flex-1 text-center p-6 rounded-xl border-2 border-slate-200 dark:border-border-dark">
+                    <div class="flex-1 text-center p-6 rounded-xl border-2 border-slate-200 dark:border-border-dark card-animate">
                         <div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">2</div>
                         <h4 class="font-semibold text-slate-900 dark:text-white mb-2">Track</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400">Movyent tracks the animal frame-by-frame</p>
+                        <p class="text-sm text-slate-600 dark:text-white/70">Movyent tracks the animal frame-by-frame</p>
                     </div>
-                    <div class="flex-1 text-center p-6 rounded-xl border-2 border-slate-200 dark:border-border-dark">
+                    <div class="flex-1 text-center p-6 rounded-xl border-2 border-slate-200 dark:border-border-dark card-animate">
                         <div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">3</div>
                         <h4 class="font-semibold text-slate-900 dark:text-white mb-2">Analyze</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400">Analyze metrics and export your data</p>
+                        <p class="text-sm text-slate-600 dark:text-white/70">Analyze metrics and export your data</p>
                     </div>
                 </div>
             </div>
@@ -418,23 +517,23 @@
             <div class="mb-16">
                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Roadmap</h3>
                 <ul class="space-y-3">
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-blue-500">schedule</span>
                         Multi-animal tracking support
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-blue-500">schedule</span>
                         Social interaction metrics
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-blue-500">schedule</span>
                         Cloud sync for collaboration
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-blue-500">schedule</span>
                         Mobile companion app
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700 dark:text-white">
                         <span class="material-icons-round text-blue-500">schedule</span>
                         Integration with lab notebooks
                     </li>
@@ -447,23 +546,23 @@
                 <div class="space-y-4">
                     <details class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
                         <summary class="font-semibold text-slate-900 dark:text-white cursor-pointer">What animals can I track?</summary>
-                        <p class="mt-3 text-slate-600 dark:text-slate-400">Mice, rats, Drosophila, zebrafish, and other small animals with good contrast against the arena.</p>
+                        <p class="mt-3 text-slate-600 dark:text-white/70">Mice, rats, Drosophila, zebrafish, and other small animals with good contrast against the arena.</p>
                     </details>
                     <details class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
                         <summary class="font-semibold text-slate-900 dark:text-white cursor-pointer">Does it work offline?</summary>
-                        <p class="mt-3 text-slate-600 dark:text-slate-400">Yes, 100% offline. Your data never leaves your computer.</p>
+                        <p class="mt-3 text-slate-600 dark:text-white/70">Yes, 100% offline. Your data never leaves your computer.</p>
                     </details>
                     <details class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
                         <summary class="font-semibold text-slate-900 dark:text-white cursor-pointer">What file formats are supported?</summary>
-                        <p class="mt-3 text-slate-600 dark:text-slate-400">MP4, AVI, and MOV video files up to 200MB.</p>
+                        <p class="mt-3 text-slate-600 dark:text-white/70">MP4, AVI, and MOV video files up to 200MB.</p>
                     </details>
                     <details class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
                         <summary class="font-semibold text-slate-900 dark:text-white cursor-pointer">Do I need a powerful computer?</summary>
-                        <p class="mt-3 text-slate-600 dark:text-slate-400">No. Movyent is optimized for Chromebooks and low-spec devices.</p>
+                        <p class="mt-3 text-slate-600 dark:text-white/70">No. Movyent is optimized for Chromebooks and low-spec devices.</p>
                     </details>
                     <details class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-border-dark">
                         <summary class="font-semibold text-slate-900 dark:text-white cursor-pointer">Is it free?</summary>
-                        <p class="mt-3 text-slate-600 dark:text-slate-400">Yes, Movyent is free and open source.</p>
+                        <p class="mt-3 text-slate-600 dark:text-white/70">Yes, Movyent is free and open source.</p>
                     </details>
                 </div>
             </div>
@@ -475,20 +574,86 @@
         <div class="max-w-6xl mx-auto">
             <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div class="flex items-center gap-2">
-                    <span class="material-icons-round text-xl text-slate-400">analytics</span>
-                    <span class="text-lg font-semibold text-slate-700 dark:text-slate-300">Movyent</span>
+                    <span class="material-icons-round text-xl text-slate-400 dark:text-white/60">analytics</span>
+                    <span class="text-lg font-semibold text-slate-700 dark:text-white">Movyent</span>
                 </div>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
+                <p class="text-sm text-slate-500 dark:text-white/60">
                     Offline Behavioral Analysis System
                 </p>
                 <div class="flex items-center gap-6">
-                    <a href="#" class="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">Documentation</a>
-                    <a href="#" class="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">GitHub</a>
-                    <a href="#" class="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">Contact</a>
+                    <a href="#" class="text-sm text-slate-500 hover:text-slate-700 dark:text-white/60 dark:hover:text-white transition-colors">Documentation</a>
+                    <a href="#" class="text-sm text-slate-500 hover:text-slate-700 dark:text-white/60 dark:hover:text-white transition-colors">GitHub</a>
+                    <a href="#" class="text-sm text-slate-500 hover:text-slate-700 dark:text-white/60 dark:hover:text-white transition-colors">Contact</a>
                 </div>
             </div>
         </div>
     </footer>
+
+    <script>
+        // Trigger animations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const animatedElements = document.querySelectorAll('.animate-on-load');
+            animatedElements.forEach(el => {
+                el.style.opacity = '0';
+            });
+
+            setTimeout(() => {
+                animatedElements.forEach(el => {
+                    el.classList.remove('animate-on-load');
+                });
+            }, 100);
+        });
+
+        // Button ripple effect
+        document.querySelectorAll('.btn-animate, button, a[href]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+
+                this.appendChild(ripple);
+
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Add intersection observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(section);
+        });
+
+        // Immediately show first section
+        const firstSection = document.querySelector('section');
+        if (firstSection) {
+            firstSection.style.opacity = '1';
+            firstSection.style.transform = 'translateY(0)';
+        }
+    </script>
 
 </body>
 </html>
