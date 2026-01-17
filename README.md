@@ -363,21 +363,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For questions, bug reports, or feature requests:
 - Open an issue on GitHub
-- Email: your.email@example.com
-
----
-
-## 🗺️ Roadmap
-
-Future features under consideration:
-
-- [ ] Multi-animal tracking support
-- [ ] Social interaction analysis
-- [ ] Custom zone definition (polygon drawing)
-- [ ] Video annotation export for manual verification
-- [ ] Batch processing for multiple videos
-- [ ] API for programmatic access
-- [ ] Integration with common neuroscience tools (DeepLabCut, SLEAP)
+- Email: eugene201903t@gmail.com
 
 ---
 
