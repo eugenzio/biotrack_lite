@@ -932,40 +932,15 @@ def show_welcome_screen():
     # What is Movyent? expandable section
     with st.expander("What is Movyent?", expanded=False):
         st.markdown("""
-        **Movyent** is a browser-based behavioral tracking platform that helps students and labs
-        quantify animal movement on low-spec devices.
-
-        #### Who It's For
-        - Undergraduate and graduate students
-        - Teaching labs with limited budgets
-        - Research labs starting behavior experiments
-        - Schools using Chromebooks
-
-        #### What It Does
-        - Track animal movement using computer vision
-        - Calculate distance, velocity, and zone metrics
-        - Detect freezing behavior automatically
-        - Export data to CSV/Excel
-        - Works 100% offline
-
-        #### Why It Matters
-        - Runs on Chromebooks and low-spec laptops
-        - No GPU required
-        - Free and open source
-        - Reproducible research results
-        - Accessible to underfunded labs
-
-        #### How It Works
-        1. **Upload Video** - Upload video of your behavioral arena
-        2. **Track** - Movyent tracks the animal frame-by-frame
-        3. **Analyze** - Analyze metrics and export your data
-
-        #### FAQ
-        - **What animals can I track?** Mice, rats, Drosophila, zebrafish, and other small animals with good contrast against the arena.
-        - **Does it work offline?** Yes, 100% offline. Your data never leaves your computer.
-        - **What file formats are supported?** MP4, AVI, and MOV video files up to 200MB.
-        - **Do I need a powerful computer?** No. Movyent is optimized for Chromebooks and low-spec devices.
-        - **Is it free?** Yes, Movyent is free and open source.
+        Movyent is a browser-based behavioral tracking platform designed to help students and research labs quantify animal movement without requiring expensive hardware. The platform serves undergraduate and graduate students, teaching labs operating on limited budgets, research labs beginning behavior experiments, and schools that rely on Chromebooks for their computing needs.
+                    
+The software uses computer vision to track animal movement frame by frame, calculating metrics such as distance traveled, velocity, and time spent in designated zones. It can automatically detect freezing behavior and exports all data to CSV or Excel formats for further analysis. Because the entire system runs locally in the browser, it works completely offline without sending any data to external servers.
+                    
+What sets Movyent apart from existing solutions is its accessibility. The platform runs smoothly on Chromebooks and other low-specification laptops without requiring a dedicated GPU, making it a practical option for underfunded labs and classroom settings where specialized equipment is not available. The software is free and open source, which also supports reproducible research by allowing anyone to verify and replicate analyses.
+                    
+Using Movyent involves three straightforward steps. First, users upload a video recording of their behavioral arena. The software then processes the video and tracks the animal through each frame. Finally, users can review the calculated metrics and export their data for statistical analysis or publication.
+                    
+The platform supports tracking of mice, rats, Drosophila, zebrafish, and other small animals that provide sufficient contrast against the arena background. It accepts MP4, AVI, and MOV video files up to 200MB in size.
         """)
 
     # Feature cards below
